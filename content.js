@@ -365,5 +365,636 @@ done</code></pre>
       { id: "d5_t3", text: "Define an array of three package names (e.g., <code>curl</code>, <code>git</code>, <code>nginx</code>) and loop through them, printing a statement for each." },
       { id: "d5_t4", text: "Implement a script that accepts command-line arguments using <code>getopts</code> supporting a <code>-f &lt;filename&gt;</code> argument." }
     ]
+  },
+  6: {
+    title: "Networking Fundamentals",
+    sections: [
+      {
+        title: "✉️ The OSI & TCP/IP Models (Simplified)",
+        content: `
+          <p>DevOps is all about moving data. To understand how containers and servers talk, you must understand the network stack.</p>
+          <p>While the theoretical <strong>OSI Model</strong> has 7 layers, the actual internet runs on the 4-layer <strong>TCP/IP Model</strong>:</p>
+          <ol>
+            <li><strong>Application Layer (HTTP, DNS, SSH)</strong>: The app you use (e.g., your browser requesting a page).</li>
+            <li><strong>Transport Layer (TCP, UDP)</strong>: Determines *how* data is sent. TCP guarantees delivery (like registered mail); UDP is fast but has no delivery guarantees (like a postcard).</li>
+            <li><strong>Network Layer (IP)</strong>: Routes packets across different networks using IP addresses.</li>
+            <li><strong>Link / Physical Layer (Ethernet, Wi-Fi)</strong>: The actual cables or radio waves transferring raw bits.</li>
+          </ol>
+          <div class="lesson-callout info">
+            <strong>💡 Real-World Analogy:</strong> Sending an email is like writing a letter. The Application layer is writing the letter. The Transport layer puts it in an envelope and adds a tracking code (TCP). The Network layer writes the destination address. The Physical layer is the mail truck carrying it.
+          </div>
+        `
+      },
+      {
+        title: "🌐 IP Addressing, Subnets & CIDR Notation",
+        content: `
+          <p>Every server has an IP address (like <code>192.168.1.50</code>). To group and isolate networks, we use **subnets** defined by **CIDR (Classless Inter-Domain Routing)** notation.</p>
+          <p>A CIDR address looks like <code>10.0.0.0/24</code>. The <code>/24</code> represents the subnet mask and tells us how many bits are locked for the network identity, leaving the remaining bits for host machines:</p>
+          <ul>
+            <li><code>/32</code>: Single IP address (e.g., <code>10.0.0.5/32</code>).</li>
+            <li><code>/24</code>: Lock first 3 octets (e.g., <code>10.0.0.0</code> to <code>10.0.0.255</code>). Gives <strong>256 IP addresses</strong>. (Default for cloud VPC subnets).</li>
+            <li><code>/16</code>: Lock first 2 octets (e.g., <code>10.0.0.0</code> to <code>10.0.255.255</code>). Gives <strong>65,536 IP addresses</strong>. (Default for whole cloud VPCs).</li>
+          </ul>
+        `
+      },
+      {
+        title: "🧭 DNS, DHCP, NAT & Routing",
+        content: `
+          <p>For systems to coordinate, several helper protocols run in the background:</p>
+          <ul>
+            <li><strong>DNS (Domain Name System)</strong>: The phonebook of the internet. Translates human-readable names (<code>google.com</code>) to IPs (<code>142.250.190.46</code>).</li>
+            <li><strong>DHCP (Dynamic Host Configuration Protocol)</strong>: Automatically assigns an IP address to a server when it connects to a network.</li>
+            <li><strong>NAT (Network Address Translation)</strong>: Allows multiple servers inside a private network to share a single public IP to access the internet.</li>
+            <li><strong>Routing</strong>: The process of determining the best path for data packets to travel from source to destination across networks.</li>
+          </ul>
+        `
+      },
+      {
+        title: "🧱 Ports & Firewalls (UFW)",
+        content: `
+          <p>An IP address directs traffic to a server, but a <strong>Port</strong> directs traffic to the correct application on that server. Think of the server as an apartment building, and ports as individual apartment numbers.</p>
+          <p>Common ports you must know:</p>
+          <ul>
+            <li><code>22</code>: SSH (Remote access)</li>
+            <li><code>80</code>: HTTP (Unsecured web traffic)</li>
+            <li><code>443</code>: HTTPS (Secured web traffic)</li>
+            <li><code>53</code>: DNS</li>
+          </ul>
+          <p>We use <strong>UFW (Uncomplicated Firewall)</strong> to block unwanted ports on Linux servers:</p>
+          <pre class="lesson-code"><code># Check UFW firewall status
+sudo ufw status
+
+# Set default policies (Block all incoming, allow all outgoing)
+sudo ufw default deny incoming
+sudo ufw default allow outgoing
+
+# Allow specific ports
+sudo ufw allow 22/tcp
+sudo ufw allow 80/tcp
+sudo ufw enable</code></pre>
+        `
+      }
+    ],
+    practice: [
+      { id: "d6_t1", text: "Find your local IP address and default gateway using <code>ip addr show</code> or <code>ip route show</code>." },
+      { id: "d6_t2", text: "Perform a DNS lookup for <code>github.com</code> using <code>nslookup</code> or <code>dig</code>, listing its IP addresses." },
+      { id: "d6_t3", text: "Inspect all open ports listening on TCP protocols using <code>ss -tulnp</code>." },
+      { id: "d6_t4", text: "Construct the exact UFW firewall commands to allow SSH (port 22) and HTTPS (port 443), then enable the firewall." }
+    ]
+  },
+  7: {
+    title: "Linux Networking Tools",
+    sections: [
+      {
+        title: "📡 Web Clients: curl & wget",
+        content: `
+          <p>In DevOps, you often need to check if a service is healthy or download binaries from scripts. We use <code>curl</code> and <code>wget</code>:</p>
+          <ul>
+            <li><code>curl</code>: Prints the page content to stdout. Perfect for querying APIs or testing response codes.
+              <ul>
+                <li><code>curl -I https://google.com</code>: Fetch only HTTP headers (shows status codes like 200, 301, 404).</li>
+                <li><code>curl -X POST -d '{"key":"val"}' https://api.com</code>: Sends a POST request with JSON payload.</li>
+              </ul>
+            </li>
+            <li><code>wget</code>: Downloads files directly to disk.
+              <ul>
+                <li><code>wget https://example.com/installer.sh</code>: Saves the file in the current directory.</li>
+              </ul>
+            </li>
+          </ul>
+        `
+      },
+      {
+        title: "🔌 Netcat (nc): The Networking Swiss Army Knife",
+        content: `
+          <p><code>nc</code> (netcat) reads and writes data across network connections. It is invaluable for testing connectivity and debugging networks.</p>
+          <pre class="lesson-code"><code># 1. Test if a port is open on a remote server
+nc -zv 192.168.1.100 80
+
+# 2. Start a temporary listener on port 8080 (serves as a simple server)
+nc -l 8080
+
+# 3. Connect to that listener from another terminal or server
+nc localhost 8080</code></pre>
+        `
+      },
+      {
+        title: "🕵️ Packet Sniffing with tcpdump",
+        content: `
+          <p>When services fail to communicate, you must look at the actual network packets flying back and forth. <code>tcpdump</code> intercepts and displays TCP/IP packets.</p>
+          <pre class="lesson-code"><code># Capture packets on interface eth0
+sudo tcpdump -i eth0
+
+# Capture packets matching port 80 (HTTP)
+sudo tcpdump -i any port 80
+
+# Limit capture count to 5 packets and show in ASCII format
+sudo tcpdump -c 5 -A -i any port 80</code></pre>
+        `
+      },
+      {
+        title: "🔑 Secure Connections: SSH, SCP & Rsync",
+        content: `
+          <p>To operate servers securely, we encrypt traffic:</p>
+          <ul>
+            <li><strong>SSH (Secure Shell)</strong>: Log into remote servers.
+              <ul>
+                <li><code>ssh-keygen -t ed25519</code>: Generates a modern secure SSH keypair (private key + public key).</li>
+                <li><code>ssh-copy-id user@server-ip</code>: Copies public key to server's <code>authorized_keys</code> to enable passwordless login.</li>
+              </ul>
+            </li>
+            <li><strong>SCP (Secure Copy)</strong>: Copy files over SSH.
+              <ul>
+                <li><code>scp file.txt user@server-ip:/tmp/</code></li>
+              </ul>
+            </li>
+            <li><strong>Rsync</strong>: Synchronizes directories efficiently. It only copies files that changed (delta sync), whereas SCP copies everything.
+              <ul>
+                <li><code>rsync -avz --delete local/ user@server-ip:remote/</code> (<code>-a</code> preserves permissions, <code>-v</code> verbose, <code>-z</code> compresses, <code>--delete</code> deletes remote files that no longer exist locally).</li>
+              </ul>
+            </li>
+          </ul>
+        `
+      }
+    ],
+    practice: [
+      { id: "d7_t1", text: "Generate a new secure SSH keypair using <code>ssh-keygen -t ed25519</code> with a custom comment." },
+      { id: "d7_t2", text: "Run <code>curl -I https://www.github.com</code> and find the HTTP status code and server header." },
+      { id: "d7_t3", text: "Open two terminals: listen on port <code>9999</code> with <code>nc -l</code> in one, and send text to it from the second using <code>nc</code>." },
+      { id: "d7_t4", text: "Construct an <code>rsync</code> command that copies a folder recursively, preserves attributes, enables compression, and deletes redundant remote files." }
+    ]
+  },
+  8: {
+    title: "Git Version Control — Basics",
+    sections: [
+      {
+        title: "🕰️ What is Git & How Does it Work?",
+        content: `
+          <p>Git is a distributed version control system. It acts as a <strong>time machine</strong> for your code. As a DevOps Engineer, all infrastructure configurations (IaC) and pipeline files are written in code, meaning Git is essential for tracking updates and deploying systems.</p>
+          <p>Git stores code in three distinct stages locally:</p>
+          <ol>
+            <li><strong>Working Directory</strong>: The files you are currently editing.</li>
+            <li><strong>Staging Area (Index)</strong>: A staging ground where you prepare files for the next snapshot.</li>
+            <li><strong>Local Repository</strong>: Git's database containing all finalized commits (snapshots).</li>
+          </ol>
+          <div class="lesson-callout info">
+            <strong>💡 Real-World Analogy:</strong> Imagine you're taking a family photo. The family members choosing what to wear represents the Working Directory. Grouping them on the couch represents the Staging Area (<code>git add</code>). Snapping the camera shutter represents the Commit (<code>git commit</code>).
+          </div>
+        `
+      },
+      {
+        title: "📦 Staging & Committing Changes",
+        content: `
+          <p>Let's create a local Git repository and save changes:</p>
+          <pre class="lesson-code"><code># Initialize a new Git repository
+git init my-project
+cd my-project
+
+# Check status of files
+git status
+
+# Stage a file
+git add config.env
+
+# Commit changes with a descriptive message
+git commit -m "feat: configure environment variables"</code></pre>
+        `
+      },
+      {
+        title: "🌿 Branching: Parallel Realities",
+        content: `
+          <p>Branches allow you to work on new features, fix bugs, or experiment with pipeline configurations without breaking the stable production branch (usually <code>main</code> or <code>master</code>).</p>
+          <pre class="lesson-code"><code># List local branches
+git branch
+
+# Create a new branch and switch to it instantly
+git checkout -b feature/setup-cron
+# OR (modern syntax)
+git switch -c feature/setup-cron
+
+# Switch back to the main branch
+git checkout main</code></pre>
+        `
+      },
+      {
+        title: "🤝 Merging: Combining Branches",
+        content: `
+          <p>Once your feature is complete and tested on your branch, you want to merge it back into the main branch.</p>
+          <pre class="lesson-code"><code># 1. Switch back to the receiving branch
+git checkout main
+
+# 2. Merge feature branch
+git merge feature/setup-cron
+
+# 3. Clean up the branch after a successful merge
+git branch -d feature/setup-cron</code></pre>
+        `
+      }
+    ],
+    practice: [
+      { id: "d8_t1", text: "Create a directory, initialize it as a Git repository using <code>git init</code>." },
+      { id: "d8_t2", text: "Create a dummy file <code>app.py</code>, stage it, and commit it with a standard commit message." },
+      { id: "d8_t3", text: "Create and switch to a branch named <code>feature/logging</code>, add logging code to the file, and commit it." },
+      { id: "d8_t4", text: "Switch back to the main branch and merge the <code>feature/logging</code> branch, then delete the feature branch." }
+    ]
+  },
+  9: {
+    title: "Git — Collaboration & Remotes",
+    sections: [
+      {
+        title: "☁️ Remote Repositories (GitHub/GitLab)",
+        content: `
+          <p>Git is distributed, meaning your local database is completely independent. To collaborate, you connect your local repo to a central server called a <strong>Remote</strong> (like GitHub or GitLab).</p>
+          <pre class="lesson-code"><code># Add a remote named "origin" pointing to GitHub
+git remote add origin https://github.com/username/repo.git
+
+# Verify registered remote URLs
+git remote -v
+
+# Push local main branch to remote for the first time
+git push -u origin main
+
+# Fetch changes from remote without merging them
+git fetch
+
+# Pull remote changes and merge them directly into your branch
+git pull origin main</code></pre>
+        `
+      },
+      {
+        title: "🔀 Dealing with Merge Conflicts",
+        content: `
+          <p>A merge conflict occurs when two developers modify the exact same line of a file in different ways and try to merge them. Git gets confused and asks you to choose which version to keep.</p>
+          <p>When a conflict occurs, Git halts the merge and inserts markers into the affected files:</p>
+          <pre class="lesson-code"><code>&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD
+DATABASE_URL="mongodb://localhost:27017"
+=======
+DATABASE_URL="postgresql://postgres:dbpass@localhost:5432"
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; feature/postgres</code></pre>
+          <p>To resolve it:</p>
+          <ol>
+            <li>Open the file and delete the markers (<code>&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code>, <code>=======</code>, <code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;</code>).</li>
+            <li>Choose which line of code to keep (or combine both).</li>
+            <li>Save the file, stage it (<code>git add</code>), and commit (<code>git commit</code>) to finalize the merge.</li>
+          </ol>
+        `
+      },
+      {
+        title: "🚫 Ignoring Files with .gitignore",
+        content: `
+          <p>Never commit secret credentials, credentials/tokens, build files, database files, or dependencies (like <code>node_modules</code>) to your Git repository. It makes the repository huge and exposes confidential secrets.</p>
+          <p>We solve this by creating a file named <code>.gitignore</code> at the root of the project. Each line tells Git which files or directories to ignore:</p>
+          <pre class="lesson-code"><code># Ignore node dependencies
+node_modules/
+
+# Ignore local configuration containing secrets
+.env
+secret.key
+
+# Ignore all log files
+*.log</code></pre>
+        `
+      }
+    ],
+    practice: [
+      { id: "d9_t1", text: "Create a <code>.gitignore</code> file that ignores <code>.env</code> and all <code>.tmp</code> files." },
+      { id: "d9_t2", text: "Create a file named <code>env.tmp</code>, run <code>git status</code>, and verify that Git does not see it." },
+      { id: "d9_t3", text: "Induce a merge conflict by editing the same line of <code>config.txt</code> on <code>main</code> and a feature branch, then trying to merge." },
+      { id: "d9_t4", text: "Resolve the conflict manually by editing out the markers, staging the file, and running <code>git commit</code>." }
+    ]
+  },
+  10: {
+    title: "Git Workflows & Best Practices",
+    sections: [
+      {
+        title: "🌳 Branching Workflows: GitFlow vs Trunk-Based",
+        content: `
+          <p>How do software teams merge code securely without causing chaos? They use workflows:</p>
+          <ul>
+            <li><strong>GitFlow</strong>: Uses multiple long-lived branches (<code>master</code> for production, <code>develop</code> for integration, plus short-lived <code>feature/*</code>, <code>hotfix/*</code>, and <code>release/*</code> branches). It is very structured but slower.</li>
+            <li><strong>Tr trunk-Based Development</strong>: Developers merge small, frequent updates directly into a single central branch (usually <code>main</code>). Minimizes merge conflicts and enables Continuous Integration. Recommended for modern DevOps teams.</li>
+          </ul>
+        `
+      },
+      {
+        title: "🧳 Rebasing vs Merging",
+        content: `
+          <p>There are two ways to integrate changes from one branch into another:</p>
+          <ul>
+            <li><strong>Merging</strong>: Combines branches by creating a special "merge commit" in the history. It preserves history chronologically but can make the history graph messy.</li>
+            <li><strong>Rebasing (<code>git rebase</code>)</strong>: Moves the starting commit of your branch to the tip of the target branch. It rewrites history to create a clean, linear timeline.</li>
+          </ul>
+          <div class="lesson-callout warning">
+            <strong>⚠️ Golden Rule of Rebasing:</strong> Never rebase a branch that is public or shared with other developers. It rewrites commit history, which will desynchronize everyone else's repositories.
+          </div>
+        `
+      },
+      {
+        title: "💬 Conventional Commits",
+        content: `
+          <p>DevOps automation relies on structured commit messages. We use <strong>Conventional Commits</strong> to format messages, which allows scripts to automatically generate changelogs and determine semver version bumps.</p>
+          <p>Format: <code>&lt;type&gt;(&lt;scope&gt;): &lt;description&gt;</code></p>
+          <ul>
+            <li><code>feat</code>: A new user feature (e.g., <code>feat(auth): add google sign-in</code>).</li>
+            <li><code>fix</code>: A bug fix (e.g., <code>fix(db): resolve timeout on postgres</code>).</li>
+            <li><code>docs</code>: Documentation changes (e.g., <code>docs(readme): add installation guide</code>).</li>
+            <li><code>chore</code>: Build process, tools, or library changes (e.g., <code>chore: upgrade node version</code>).</li>
+          </ul>
+        `
+      },
+      {
+        title: "🪝 Git Hooks & Pre-commit",
+        content: `
+          <p>Git hooks are scripts that run automatically when specific events occur in your repository (like before you commit, or after you push). They live in your local folder at <code>.git/hooks/</code>.</p>
+          <p>We use <strong>pre-commit hooks</strong> to run linters, formatters, and secret scans automatically. If a script fails (e.g., you accidentally left an AWS API key in the file), Git cancels the commit, protecting the server.</p>
+        `
+      }
+    ],
+    practice: [
+      { id: "d10_t1", text: "Create a dummy commit using the Conventional Commit syntax (e.g., <code>feat(api): add health endpoint</code>)." },
+      { id: "d10_t2", text: "Use <code>git log --oneline --graph --all</code> to inspect the branching commit graph of your repository." },
+      { id: "d10_t3", text: "Perform an interactive rebase (<code>git rebase -i HEAD~2</code>) to squash two local commits into a single commit." },
+      { id: "d10_t4", text: "Navigate to the hidden directory <code>.git/hooks</code> inside your repo and inspect the sample files." }
+    ]
+  },
+  11: {
+    title: "Linux Security Hardening",
+    sections: [
+      {
+        title: "🔒 Hardening the SSH Server",
+        content: `
+          <p>When you spin up a cloud server, attackers will instantly start trying brute-force attacks on port 22 (SSH). You must secure it immediately by editing the SSH configuration file at <code>/etc/ssh/sshd_config</code>.</p>
+          <p>Add or modify the following settings to secure the daemon:</p>
+          <pre class="lesson-code"><code># Disable root login (always log in as normal user, then sudo)
+PermitRootLogin no
+
+# Disable password authentication (forces SSH key auth only)
+PasswordAuthentication no
+
+# Change default port 22 to a random port (e.g., 2222)
+Port 2222
+
+# Limit max login attempts before dropping connection
+MaxAuthTries 3</code></pre>
+          <div class="lesson-callout warning">
+            <strong>⚠️ Caution:</strong> Always test your SSH configuration changes in a separate terminal before logging out, or you risk locking yourself out of your server permanently!
+          </div>
+        `
+      },
+      {
+        title: "🛡️ Dynamic Firewall: fail2ban",
+        content: `
+          <p><code>fail2ban</code> is a service that monitors system logs (like SSH auth logs) for brute-force attacks. If it detects multiple failed login attempts from an IP address within a short timeframe, it automatically updates firewall rules to block that IP.</p>
+          <pre class="lesson-code"><code># Install fail2ban on Ubuntu
+sudo apt update && sudo apt install fail2ban -y
+
+# Check fail2ban status
+sudo fail2ban-client status sshd</code></pre>
+        `
+      },
+      {
+        title: "👑 Privilege Management: visudo & sudoers",
+        content: `
+          <p>To avoid logging in as root, normal users use <code>sudo</code> (Superuser Do) to execute admin commands. The permissions for who can run sudo are stored in the file <code>/etc/sudoers</code>.</p>
+          <p><strong>Never edit this file directly with a normal editor!</strong> If you make a syntax error, you will destroy sudo privileges for the system. Instead, always use <code>visudo</code>, which performs syntax validation before saving.</p>
+          <pre class="lesson-code"><code># Edit the sudoers file safely
+sudo visudo
+
+# Line inside sudoers granting user 'john' passwordless sudo access (common in automation)
+john ALL=(ALL) NOPASSWD: ALL</code></pre>
+        `
+      }
+    ],
+    practice: [
+      { id: "d11_t1", text: "Locate the SSH server configuration file on your system (typically <code>/etc/ssh/sshd_config</code>)." },
+      { id: "d11_t2", text: "Look up login attempt reports in your system authentication logs (<code>/var/log/auth.log</code> or <code>/var/log/secure</code>) using <code>grep</code>." },
+      { id: "d11_t3", text: "Run <code>sudo -l</code> to inspect the exact commands your current user is authorized to run as root." },
+      { id: "d11_t4", text: "Identify the visudo editor by running <code>sudo visudo -c</code> to run a check on the configuration file." }
+    ]
+  },
+  12: {
+    title: "AppArmor, SELinux & Audit",
+    sections: [
+      {
+        title: "👮 Mandatory Access Control (MAC)",
+        content: `
+          <p>Standard Linux uses <strong>Discretionary Access Control (DAC)</strong>, where a file's owner decides its permissions. If an attacker hacks a web server running as user <code>www-data</code>, they inherit the privileges of that user and can read any files accessible to <code>www-data</code>.</p>
+          <p><strong>Mandatory Access Control (MAC)</strong> restricts this. MAC systems define strict, system-wide policies. Even if a process is running as root, the system will prevent it from executing actions outside its predefined profile.</p>
+        `
+      },
+      {
+        title: "🐧 AppArmor (Ubuntu/Debian standard)",
+        content: `
+          <p>AppArmor binds security profiles to paths of executables. Profiles operate in two modes:</p>
+          <ul>
+            <li><strong>Complain Mode</strong>: AppArmor logs profile violations but does not block the actions. Used for testing.</li>
+            <li><strong>Enforce Mode</strong>: AppArmor blocks violations and logs them. Used in production.</li>
+          </ul>
+          <pre class="lesson-code"><code># Check status of AppArmor profiles
+sudo aa-status
+
+# Set a profile to complain mode
+sudo aa-complain /usr/sbin/nginx
+
+# Set a profile to enforce mode
+sudo aa-enforce /usr/sbin/nginx</code></pre>
+        `
+      },
+      {
+        title: "🔒 SELinux (CentOS/RedHat standard)",
+        content: `
+          <p>SELinux is more powerful and complex than AppArmor. It assigns a security context (label) to every process, file, and network port. It has three operating modes:</p>
+          <ul>
+            <li><strong>Enforcing</strong>: Block and log policy violations.</li>
+            <li><strong>Permissive</strong>: Log violations but do not block.</li>
+            <li><strong>Disabled</strong>: SELinux turned off completely.</li>
+          </ul>
+          <pre class="lesson-code"><code># Check SELinux status
+sestatus
+
+# Temporarily switch mode (1 = Enforcing, 0 = Permissive)
+sudo setenforce 0</code></pre>
+        `
+      },
+      {
+        title: "🕵️ System Auditing with auditd",
+        content: `
+          <p>As a DevOps engineer, you need to track who altered system configuration files. <code>auditd</code> is the Linux Audit Daemon, which logs security-related events to disk.</p>
+          <pre class="lesson-code"><code># Add a rule to watch modifications to /etc/passwd
+sudo auditctl -w /etc/passwd -p wa -k passwd_changes
+
+# Search audit logs for changes matching the key
+sudo ausearch -k passwd_changes
+
+# View reports of system failures
+sudo aureport</code></pre>
+        `
+      }
+    ],
+    practice: [
+      { id: "d12_t1", text: "Run <code>aa-status</code> (or <code>sestatus</code> depending on your distribution) and find out how many profiles are in enforce mode." },
+      { id: "d12_t2", text: "Write an audit rule using <code>auditctl</code> to watch write accesses (<code>w</code>) and attribute changes (<code>a</code>) on the <code>/etc/hosts</code> file." },
+      { id: "d12_t3", text: "Locate the log file where audit daemon messages are stored (usually <code>/var/log/audit/audit.log</code>)." },
+      { id: "d12_t4", text: "Modify a dummy file watched by an audit rule, then query the logs using <code>ausearch</code> to confirm the event was logged." }
+    ]
+  },
+  13: {
+    title: "CIS Benchmarks & File Integrity",
+    sections: [
+      {
+        title: "📋 What are CIS Benchmarks?",
+        content: `
+          <p>The <strong>Center for Internet Security (CIS)</strong> publishes security benchmarks—consensus-based, industry-recognized best practices for hardening operating systems, cloud environments, and container platforms.</p>
+          <p>CIS hardening guides contain hundreds of rules, such as: "Ensure node-local directories have separate partitions" or "Ensure root login via SSH is disabled". DevOps teams use compliance scanners (like OpenSCAP or cloud audit scripts) to audit their systems against these benchmarks.</p>
+        `
+      },
+      {
+        title: "🔍 File Integrity Monitoring (FIM)",
+        content: `
+          <p>If an attacker gets inside your system, they may attempt to install a rootkit or modify system binaries (like replacing the <code>ls</code> command with a malicious script that hides their malware folder).</p>
+          <p><strong>File Integrity Monitoring (FIM)</strong> works by taking a cryptographic hash (SHA-256) of critical system files when the server is clean, saving these hashes to a database, and comparing them regularly. If a binary is altered, the hashes will mismatch, trigger alerts, and signal an intrusion.</p>
+        `
+      },
+      {
+        title: "🛡️ AIDE: Advanced Intrusion Detection Environment",
+        content: `
+          <p><code>AIDE</code> is a free FIM tool for Linux. It creates a local database containing file hashes, permissions, and metadata.</p>
+          <pre class="lesson-code"><code># Install AIDE
+sudo apt update && sudo apt install aide -y
+
+# Initialize AIDE database (creates /var/lib/aide/aide.db.new.gz)
+sudo aideinit
+
+# Move database to active path
+sudo mv /var/lib/aide/aide.db.new.gz /var/lib/aide/aide.db.gz
+
+# Check system for alterations
+sudo aide --check</code></pre>
+        `
+      },
+      {
+        title: "🕵️ Scanning for Rootkits",
+        content: `
+          <p>A rootkit is a collection of tools designed to hide an intruder's presence on a system. We run specialized scanning tools periodically to check for common signatures:</p>
+          <pre class="lesson-code"><code># Install Rootkit Hunter
+sudo apt install rkhunter -y
+
+# Update database of signatures
+sudo rkhunter --propupd
+
+# Run system scanner check
+sudo rkhunter --check --sk</code></pre>
+        `
+      }
+    ],
+    practice: [
+      { id: "d13_t1", text: "Look at the AIDE configuration file located at <code>/etc/aide/aide.conf</code> to see what directories it monitors." },
+      { id: "d13_t2", text: "Run commands to initialize the AIDE database (or mock initialize if database limits exist)." },
+      { id: "d13_t3", text: "Install <code>rkhunter</code> (or equivalent scanner) and update its file properties database using <code>--propupd</code>." },
+      { id: "d13_t4", text: "Construct a daily cron job schedule line that executes <code>aide --check</code> at 1:00 AM every night." }
+    ]
+  },
+  14: {
+    title: "Phase 1 Review & Mini-Project",
+    sections: [
+      {
+        title: "🏗️ Project Overview: Automated Server Provisioning Script",
+        content: `
+          <p>Congratulations! You have completed Phase 1 foundations. Now, we consolidate all this knowledge into a single portfolio project: a **Server Provisioning Bash Script**.</p>
+          <p>In DevOps, manually logging into servers to set them up is a major anti-pattern. We must automate everything so we can spin up identical, secure servers repeatably.</p>
+        `
+      },
+      {
+        title: "📋 Project Architecture & Requirements",
+        content: `
+          <p>Your script must accomplish the following steps cleanly and securely:</p>
+          <ol>
+            <li><strong>Safety Switches</strong>: Use <code>set -euo pipefail</code> to ensure the script stops if any step fails.</li>
+            <li><strong>Privilege Check</strong>: Ensure the script is run with root/sudo rights, otherwise exit.</li>
+            <li><strong>User Provisioning</strong>: Create a new developer user with a home directory and add them to the sudoers group.</li>
+            <li><strong>System Update & Package Install</strong>: Install essential utilities: <code>curl</code>, <code>git</code>, <code>htop</code>, and <code>ufw</code>.</li>
+            <li><strong>SSH Hardening</strong>: Edit the SSH config to block root login and restrict login attempts.</li>
+            <li><strong>Firewall Setup</strong>: Turn on UFW and allow only ports 22 and 80.</li>
+            <li><strong>Cron Backup Setup</strong>: Create a scheduled task to backup the home folder daily.</li>
+          </ol>
+        `
+      },
+      {
+        title: "📝 Script Template Structure",
+        content: `
+          <p>Create a file named <code>provision.sh</code> and use this baseline skeleton:</p>
+          <pre class="lesson-code"><code>#!/bin/bash
+set -euo pipefail
+
+# Check if run as root
+if [ "\$EUID" -ne 0 ]; then
+    echo "❌ Please run as root (sudo)"
+    exit 1
+fi
+
+NEW_USER=\${1:-"devops_deploy"}
+echo "🚀 Provisioning server for user: \$NEW_USER..."
+# Next steps follow...</code></pre>
+        `
+      }
+    ],
+    practice: [
+      { id: "d14_t1", text: "Create a file named <code>provision.sh</code> and write the script header, Shebang, safety switches, and privilege checks." },
+      { id: "d14_t2", text: "Implement user-creation logic in the script that checks if the username exists using <code>id</code> before running <code>useradd</code>." },
+      { id: "d14_t3", text: "Add code block inside the script to install <code>curl</code>, <code>git</code>, and <code>htop</code> packages non-interactively using <code>apt-get install -y</code>." },
+      { id: "d14_t4", text: "Test execution of the script locally (using a test username) and make sure the syntax validation checks out." }
+    ]
+  },
+  15: {
+    title: "Server Automation Script Polish",
+    sections: [
+      {
+        title: "🔄 Achieving Script Idempotency",
+        content: `
+          <p>An automation script is **Idempotent** if running it multiple times yields the same final system state without causing errors, crashes, or duplicate configurations.</p>
+          <p>For example, if you run <code>mkdir folder</code> twice, the second run fails with an error. But if you write <code>mkdir -p folder</code>, it checks if the folder exists first, making it idempotent.</p>
+          <p>Checklist for script idempotency:</p>
+          <ul>
+            <li>Check if a user exists before calling <code>useradd</code>.</li>
+            <li>Use <code>mkdir -p</code> instead of <code>mkdir</code>.</li>
+            <li>Before adding lines to configurations like <code>sshd_config</code>, use <code>grep</code> to check if the line already exists to avoid duplicates.</li>
+          </ul>
+        `
+      },
+      {
+        title: "📝 Structured Logging & Debugging",
+        content: `
+          <p>In production pipelines, scripts run invisibly. If something fails, you need historical logs. Redirect output inside your script to write to a log file with timestamps.</p>
+          <pre class="lesson-code"><code>LOG_FILE="/var/log/provision.log"
+
+log_msg() {
+    local TYPE=\$1
+    local MSG=\$2
+    echo -e "\$(date '+%Y-%m-%d %H:%M:%S') [\$TYPE] \$MSG" | tee -a "\$LOG_FILE"
+}
+
+# Usage:
+log_msg "INFO" "Installing packages..."
+log_msg "SUCCESS" "User created successfully."</code></pre>
+        `
+      },
+      {
+        title: "🧼 Cleanups and Traps",
+        content: `
+          <p>Ensure that if your script fails during execution, it cleans up all resources. Use <code>trap</code> to delete any temporary folders, disable locks, or restore configuration backups.</p>
+          <pre class="lesson-code"><code># Create backup before editing configuration
+cp /etc/ssh/sshd_config /etc/ssh/sshd_config.bak
+
+# If script exits on error, restore the backup configuration
+trap 'mv /etc/ssh/sshd_config.bak /etc/ssh/sshd_config; log_msg "ERROR" "Failed. Configuration reverted."' ERR</code></pre>
+        `
+      }
+    ],
+    practice: [
+      { id: "d15_t1", text: "Modify your provisioning script to check for existing configuration lines in <code>sshd_config</code> before appending, ensuring it runs cleanly twice." },
+      { id: "d15_t2", text: "Implement the custom <code>log_msg</code> function to write logs with timestamps to <code>/var/log/provision.log</code>." },
+      { id: "d15_t3", text: "Add a <code>trap</code> error handler block to restore config backups if editing commands fail." },
+      { id: "d15_t4", text: "Run a test run, verify the system provisioning log at <code>/var/log/provision.log</code>, commit the script to git, and push." }
+    ]
   }
 };
