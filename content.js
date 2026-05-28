@@ -2,7 +2,7 @@
    CONTENT.JS — Rich Mentor-style Lesson Content & Practice Tasks
    ============================================================ */
 
-const DAY_CONTENT = {
+export const DAY_CONTENT = {
   1: {
     title: "Linux Essentials & Navigation",
     sections: [
@@ -995,6 +995,631 @@ trap 'mv /etc/ssh/sshd_config.bak /etc/ssh/sshd_config; log_msg "ERROR" "Failed.
       { id: "d15_t2", text: "Implement the custom <code>log_msg</code> function to write logs with timestamps to <code>/var/log/provision.log</code>." },
       { id: "d15_t3", text: "Add a <code>trap</code> error handler block to restore config backups if editing commands fail." },
       { id: "d15_t4", text: "Run a test run, verify the system provisioning log at <code>/var/log/provision.log</code>, commit the script to git, and push." }
+    ]
+  },
+  16: {
+    title: "Python Basics for DevOps",
+    sections: [
+      {
+        title: "🐍 Why Python for DevOps?",
+        content: `
+          <p>Bash is great for simple scripts (less than 100 lines), but for complex logic, error handling, interacting with APIs, and parsing JSON, Python is the industry standard.</p>
+          <p>Python is pre-installed on most modern Linux distributions and is the language behind major DevOps tools like Ansible and AWS CLI.</p>
+        `
+      },
+      {
+        title: "⚙️ Running Shell Commands: subprocess",
+        content: `
+          <p>The first thing you must learn is how to execute standard Linux commands from within Python. We use the built-in <code>subprocess</code> module.</p>
+          <pre class="lesson-code"><code>import subprocess
+
+# Run a command and capture its output
+result = subprocess.run(["ls", "-la", "/var/log"], capture_output=True, text=True)
+
+# Check if the command succeeded (return code 0)
+if result.returncode == 0:
+    print("Success! Output:\\n", result.stdout)
+else:
+    print("Failed! Error:\\n", result.stderr)</code></pre>
+          <p>Always pass commands as a list of arguments (e.g., <code>["df", "-h"]</code>) rather than a single string to prevent shell injection vulnerabilities.</p>
+        `
+      },
+      {
+        title: "🗂️ Navigating the System: os and pathlib",
+        content: `
+          <p>Python gives you cross-platform tools to manage files and directories without needing bash commands.</p>
+          <ul>
+            <li><code>os.environ.get("USER")</code>: Fetch environment variables securely.</li>
+            <li><code>pathlib.Path</code>: The modern, object-oriented way to handle file paths.</li>
+          </ul>
+          <pre class="lesson-code"><code>from pathlib import Path
+import os
+
+# Create a directory if it doesn't exist (like mkdir -p)
+backup_dir = Path("/tmp/backups/today")
+backup_dir.mkdir(parents=True, exist_ok=True)
+
+# Iterate over all .log files in a folder
+log_dir = Path("/var/log")
+for log_file in log_dir.glob("*.log"):
+    print(f"Found log: {log_file.name}, Size: {log_file.stat().st_size} bytes")</code></pre>
+        `
+      },
+      {
+        title: "🛡️ Error Handling (try/except)",
+        content: `
+          <p>In DevOps, servers will be unreachable, files will be missing, and APIs will time out. You must anticipate and handle these errors gracefully instead of letting your script crash.</p>
+          <pre class="lesson-code"><code>try:
+    with open("/etc/shadow", "r") as f:
+        data = f.read()
+except PermissionError:
+    print("❌ Error: You need root privileges to read this file!")
+except FileNotFoundError:
+    print("❌ Error: File does not exist.")
+except Exception as e:
+    print(f"❌ An unexpected error occurred: {e}")</code></pre>
+        `
+      }
+    ],
+    practice: [
+      { id: "d16_t1", text: "Write a Python script that runs <code>df -h</code> using <code>subprocess.run()</code> and prints the output." },
+      { id: "d16_t2", text: "Use <code>pathlib.Path</code> to create a directory named <code>python_logs</code> in your home folder." },
+      { id: "d16_t3", text: "Write a <code>try/except</code> block that attempts to read a non-existent file and gracefully prints a custom error message." },
+      { id: "d16_t4", text: "Fetch the <code>HOME</code> and <code>USER</code> environment variables using <code>os.environ</code> and print them." }
+    ]
+  },
+  17: {
+    title: "Python File I/O & YAML",
+    sections: [
+      {
+        title: "📄 Reading and Writing Files",
+        content: `
+          <p>In Python, the safest way to handle files is using the <code>with</code> context manager. It guarantees the file is closed automatically, even if your code crashes halfway through reading it.</p>
+          <pre class="lesson-code"><code># Write lines to a file
+servers = ["web1", "web2", "db1"]
+with open("inventory.txt", "w") as f:
+    for server in servers:
+        f.write(f"{server}\\n")
+
+# Read lines from a file
+with open("inventory.txt", "r") as f:
+    lines = f.readlines()
+    print([line.strip() for line in lines])</code></pre>
+        `
+      },
+      {
+        title: "🧱 Parsing JSON",
+        content: `
+          <p>JSON (JavaScript Object Notation) is the language of modern APIs. Python's built-in <code>json</code> module converts JSON strings into Python dictionaries, and vice-versa.</p>
+          <pre class="lesson-code"><code>import json
+
+# Parsing a JSON string into a Python dictionary
+json_data = '{"instance": "i-12345", "status": "running"}'
+server = json.loads(json_data)
+print(server["status"])  # Output: running
+
+# Converting a Python dictionary to a formatted JSON string
+config = {"port": 8080, "host": "0.0.0.0"}
+print(json.dumps(config, indent=4))</code></pre>
+        `
+      },
+      {
+        title: "📜 Parsing YAML with PyYAML",
+        content: `
+          <p>YAML is the language of DevOps (Kubernetes, Ansible, Docker Compose). Python does not have a built-in YAML parser, so you must install and use the <code>PyYAML</code> library.</p>
+          <p>You can install it via pip: <code>pip install PyYAML</code>.</p>
+          <pre class="lesson-code"><code>import yaml
+
+# Read a Kubernetes configuration file
+with open("deployment.yaml", "r") as file:
+    k8s_config = yaml.safe_load(file)
+
+# Modify the replica count programmatically
+k8s_config["spec"]["replicas"] = 5
+
+# Write the changes back out to a new YAML file
+with open("deployment_updated.yaml", "w") as file:
+    yaml.dump(k8s_config, file, default_flow_style=False)</code></pre>
+          <div class="lesson-callout warning">
+            <strong>⚠️ Security Tip:</strong> Always use <code>yaml.safe_load()</code> instead of <code>yaml.load()</code> to prevent arbitrary code execution vulnerabilities!
+          </div>
+        `
+      }
+    ],
+    practice: [
+      { id: "d17_t1", text: "Create a dictionary containing fake server configuration data (IP, OS, RAM) and write it to a <code>config.json</code> file using <code>json.dump()</code>." },
+      { id: "d17_t2", text: "Read the <code>config.json</code> file back into memory and print a specific value." },
+      { id: "d17_t3", text: "Install the PyYAML module using <code>pip install PyYAML</code>." },
+      { id: "d17_t4", text: "Write a small YAML file by hand, parse it using <code>yaml.safe_load()</code>, and print the resulting dictionary." }
+    ]
+  },
+  18: {
+    title: "HTTP APIs with Python",
+    sections: [
+      {
+        title: "🌐 The Requests Library",
+        content: `
+          <p>As a DevOps engineer, you will constantly query APIs (AWS, GitHub, Slack, Datadog). While you can use the built-in <code>urllib</code>, the third-party <code>requests</code> library is the undisputed industry standard.</p>
+          <p>Install it: <code>pip install requests</code>.</p>
+        `
+      },
+      {
+        title: "📥 GET Requests",
+        content: `
+          <p>A GET request fetches data. Always use <code>response.raise_for_status()</code> to trigger an exception if the API returns an error (like a 404 or 500 status code).</p>
+          <pre class="lesson-code"><code>import requests
+
+url = "https://api.github.com/users/octocat/repos"
+response = requests.get(url)
+
+# Will raise an HTTPError if the response was unsuccessful
+response.raise_for_status()
+
+# Automatically parses the JSON body into a Python list/dict
+repos = response.json()
+for repo in repos:
+    print(f"Repo: {repo['name']}")</code></pre>
+        `
+      },
+      {
+        title: "📤 POST Requests & Headers",
+        content: `
+          <p>To create or update data, use a POST request. You must often pass Headers (for authentication) and a JSON body payload.</p>
+          <pre class="lesson-code"><code>url = "https://api.example.com/v1/servers"
+headers = {
+    "Authorization": "Bearer YOUR_SECRET_TOKEN",
+    "Content-Type": "application/json"
+}
+payload = {
+    "name": "web-prod-1",
+    "image": "ubuntu-22.04"
+}
+
+# The 'json=' parameter automatically encodes the dict to a JSON string
+response = requests.post(url, headers=headers, json=payload)
+
+if response.status_code == 201:
+    print("Server created successfully!")
+    print(response.json())
+else:
+    print(f"Failed to create: {response.status_code}")</code></pre>
+        `
+      }
+    ],
+    practice: [
+      { id: "d18_t1", text: "Install the <code>requests</code> library using pip." },
+      { id: "d18_t2", text: "Write a script that performs a GET request to <code>https://pokeapi.co/api/v2/pokemon/ditto</code> and prints the pokemon's weight." },
+      { id: "d18_t3", text: "Implement a <code>try/except</code> block that catches <code>requests.exceptions.HTTPError</code> by querying a fake/invalid URL." },
+      { id: "d18_t4", text: "Make a POST request to <code>https://httpbin.org/post</code> sending a JSON payload, and print the response to verify it worked." }
+    ]
+  },
+  19: {
+    title: "Python CLI Tools with argparse",
+    sections: [
+      {
+        title: "🛠️ Why argparse?",
+        content: `
+          <p>You can read command-line arguments using <code>sys.argv</code>, but it requires manual validation. The built-in <code>argparse</code> module automatically generates help menus (<code>-h</code>), enforces required flags, and validates data types.</p>
+          <p>It's the foundation of writing professional CLI tools in Python.</p>
+        `
+      },
+      {
+        title: "🏗️ Building a Basic CLI",
+        content: `
+          <p>Let's build a mock deployment CLI that requires an environment name and accepts an optional verbose flag.</p>
+          <pre class="lesson-code"><code>import argparse
+
+# 1. Initialize parser
+parser = argparse.ArgumentParser(
+    prog="deployer",
+    description="Deploys code to specified environment"
+)
+
+# 2. Define arguments
+# Positional argument (required)
+parser.add_argument("environment", choices=["dev", "staging", "prod"], help="Target environment")
+
+# Optional boolean flag
+parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose logging")
+
+# Optional argument with a value
+parser.add_argument("--version", type=str, default="latest", help="App version to deploy")
+
+# 3. Parse arguments
+args = parser.parse_args()
+
+print(f"Deploying version '{args.version}' to '{args.environment}'...")
+if args.verbose:
+    print("[DEBUG] Verbose mode is activated. Fetching secrets...")</code></pre>
+        `
+      },
+      {
+        title: "📝 Structured Logging",
+        content: `
+          <p>Never use <code>print()</code> for logs in production scripts. Use Python's built-in <code>logging</code> module so you can output timestamps, log levels, and redirect output to files.</p>
+          <pre class="lesson-code"><code>import logging
+
+# Configure logger
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s [%(levelname)s] %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S'
+)
+
+# Usage
+logging.info("Starting deployment process...")
+logging.warning("Disk space is below 20%")
+logging.error("Failed to connect to database!")</code></pre>
+        `
+      }
+    ],
+    practice: [
+      { id: "d19_t1", text: "Create a Python script that sets up <code>argparse</code> with a required positional argument (e.g., 'filename')." },
+      { id: "d19_t2", text: "Add an optional boolean flag <code>--dry-run</code> using <code>action='store_true'</code>." },
+      { id: "d19_t3", text: "Run the script with the <code>-h</code> flag in the terminal to view the automatically generated help menu." },
+      { id: "d19_t4", text: "Set up the <code>logging</code> module to print INFO-level logs with a timestamp format." }
+    ]
+  },
+  20: {
+    title: "Jinja2 Templating & Config Gen",
+    sections: [
+      {
+        title: "📝 What is Jinja2?",
+        content: `
+          <p>DevOps involves managing hundreds of configuration files. Instead of maintaining 50 static Nginx files for 50 websites, you maintain <strong>one template</strong> and dynamically inject variables into it.</p>
+          <p><code>Jinja2</code> is the templating engine Python (and Ansible) uses to generate files.</p>
+          <p>Install it: <code>pip install Jinja2</code>.</p>
+        `
+      },
+      {
+        title: "🧬 Creating a Template",
+        content: `
+          <p>Jinja templates use double curly braces <code>{{ var }}</code> to output variables, and <code>{% ... %}</code> for logic (like loops and if-statements).</p>
+          <p>Create a template file named <code>nginx.conf.j2</code>:</p>
+          <pre class="lesson-code"><code>server {
+    listen 80;
+    server_name {{ domain_name }};
+
+    location / {
+        proxy_pass http://localhost:{{ app_port }};
+    }
+
+    {% if enable_ssl %}
+    listen 443 ssl;
+    ssl_certificate /etc/letsencrypt/live/{{ domain_name }}/fullchain.pem;
+    {% endif %}
+}</code></pre>
+        `
+      },
+      {
+        title: "⚙️ Rendering the Template with Python",
+        content: `
+          <p>Now, write a Python script to load the template, inject variables, and output the final configuration file.</p>
+          <pre class="lesson-code"><code>from jinja2 import Environment, FileSystemLoader
+
+# 1. Set up the Jinja environment (point it to current directory)
+env = Environment(loader=FileSystemLoader('.'))
+
+# 2. Load the template file
+template = env.get_template('nginx.conf.j2')
+
+# 3. Define the variables to inject
+data = {
+    "domain_name": "api.myapp.com",
+    "app_port": 3000,
+    "enable_ssl": True
+}
+
+# 4. Render the template
+output = template.render(data)
+
+# 5. Save to disk
+with open('api.myapp.com.conf', 'w') as f:
+    f.write(output)
+print("Configuration generated successfully!")</code></pre>
+        `
+      }
+    ],
+    practice: [
+      { id: "d20_t1", text: "Install the <code>Jinja2</code> package via pip." },
+      { id: "d20_t2", text: "Create a simple template file <code>index.html.j2</code> containing variables for a title and an h1 tag." },
+      { id: "d20_t3", text: "Write a Python script that loads the template using <code>FileSystemLoader</code> and renders it." },
+      { id: "d20_t4", text: "Write the rendered output to a new file named <code>index.html</code>." }
+    ]
+  },
+  21: {
+    title: "Environment Management & Dotenv",
+    sections: [
+      {
+        title: "📦 Why Virtual Environments?",
+        content: `
+          <p>If you install global Python packages using <code>pip install X</code>, you will eventually face "dependency hell". Script A might require Requests v1.0, while Script B requires Requests v2.0. They will break each other.</p>
+          <p>A <strong>Virtual Environment (venv)</strong> is an isolated folder containing a specific Python version and its own independent set of installed packages.</p>
+        `
+      },
+      {
+        title: "🏗️ Creating & Using a venv",
+        content: `
+          <p>You should create a venv for every Python project.</p>
+          <pre class="lesson-code"><code># 1. Create a virtual environment named "env"
+python3 -m venv env
+
+# 2. Activate the environment (Linux/Mac)
+source env/bin/activate
+# (On Windows PowerShell: .\\env\\Scripts\\Activate.ps1)
+
+# Notice your terminal prompt changes! E.g. (env) $
+
+# 3. Install packages (these stay inside the env folder)
+pip install requests boto3
+
+# 4. Freeze dependencies to a requirements file
+pip freeze > requirements.txt
+
+# 5. To leave the environment, simply type:
+deactivate</code></pre>
+          <div class="lesson-callout warning">
+            <strong>⚠️ Git Rule:</strong> Always add <code>env/</code> to your <code>.gitignore</code>! You should never commit the virtual environment folder. You only commit the <code>requirements.txt</code> file.
+          </div>
+        `
+      },
+      {
+        title: "🔐 Managing Secrets with python-dotenv",
+        content: `
+          <p>Hardcoding API keys in your Python code is a severe security risk. Instead, store them in a local <code>.env</code> file (which is git-ignored!) and load them dynamically.</p>
+          <p>Create a <code>.env</code> file:</p>
+          <pre class="lesson-code"><code>AWS_ACCESS_KEY=AKIAIOSFODNN7EXAMPLE
+DATABASE_URL=postgres://user:pass@localhost/db</code></pre>
+          <p>Now, read it in Python using the <code>python-dotenv</code> library (<code>pip install python-dotenv</code>):</p>
+          <pre class="lesson-code"><code>import os
+from dotenv import load_dotenv
+
+# Loads variables from .env into os.environ
+load_dotenv()
+
+# Safely fetch the secret
+aws_key = os.getenv("AWS_ACCESS_KEY")
+print(f"Loaded key starting with: {aws_key[:4]}...")</code></pre>
+        `
+      }
+    ],
+    practice: [
+      { id: "d21_t1", text: "Create a new virtual environment using <code>python -m venv venv</code> and activate it." },
+      { id: "d21_t2", text: "Install <code>requests</code> and <code>python-dotenv</code> inside the activated venv." },
+      { id: "d21_t3", text: "Generate a <code>requirements.txt</code> file using <code>pip freeze > requirements.txt</code>." },
+      { id: "d21_t4", text: "Create a <code>.env</code> file, add a mock secret to it, and write a Python script that loads and prints the secret using <code>load_dotenv()</code>." }
+    ]
+  },
+  22: {
+    title: "Python Testing with pytest",
+    sections: [
+      {
+        title: "🧪 Why Test Infrastructure Code?",
+        content: `
+          <p>If your script deploys databases, a typo could cause an outage. Writing unit tests ensures your Python code behaves exactly as expected before it runs in production.</p>
+          <p><code>pytest</code> is the most popular testing framework in Python. Install it: <code>pip install pytest</code>.</p>
+        `
+      },
+      {
+        title: "✍️ Writing Your First Test",
+        content: `
+          <p>Pytest looks for files starting with <code>test_</code>. Inside those files, it executes any function starting with <code>test_</code>.</p>
+          <p>Create a file named <code>math_utils.py</code>:</p>
+          <pre class="lesson-code"><code>def add_servers(current, new):
+    return current + new</code></pre>
+          <p>Now create <code>test_math_utils.py</code>:</p>
+          <pre class="lesson-code"><code>from math_utils import add_servers
+
+def test_add_servers_normal():
+    # Assert that 5 + 3 equals 8
+    assert add_servers(5, 3) == 8
+
+def test_add_servers_zero():
+    assert add_servers(5, 0) == 5</code></pre>
+          <p>Run the tests by simply typing <code>pytest</code> in your terminal!</p>
+        `
+      },
+      {
+        title: "🎭 Mocking External Systems",
+        content: `
+          <p>If your script makes an API call to AWS, you don't want your unit test to actually hit AWS (it would be slow, cost money, and require internet). You must <strong>Mock</strong> the call.</p>
+          <pre class="lesson-code"><code>import requests
+from unittest.mock import patch
+
+def fetch_health_status():
+    res = requests.get("http://api.myapp.com/health")
+    return res.json()["status"]
+
+# The @patch decorator intercepts the 'requests.get' function
+@patch("requests.get")
+def test_fetch_health_status(mock_get):
+    # Set up the fake response
+    mock_get.return_value.json.return_value = {"status": "healthy"}
+
+    # Run the function (it will hit the mock, not the real internet)
+    result = fetch_health_status()
+
+    # Verify results
+    assert result == "healthy"
+    mock_get.assert_called_once_with("http://api.myapp.com/health")</code></pre>
+        `
+      }
+    ],
+    practice: [
+      { id: "d22_t1", text: "Install <code>pytest</code> using pip." },
+      { id: "d22_t2", text: "Write a simple function in <code>logic.py</code> that takes a string and returns it capitalized." },
+      { id: "d22_t3", text: "Create <code>test_logic.py</code> and write two tests using the <code>assert</code> keyword to verify the capitalization function." },
+      { id: "d22_t4", text: "Run <code>pytest -v</code> in the terminal to execute the tests and observe the passing output." }
+    ]
+  },
+  23: {
+    title: "Code Quality & Type Hints",
+    sections: [
+      {
+        title: "✨ Auto-formatting with Black",
+        content: `
+          <p>DevOps teams share code. Arguing over whether to use single quotes or double quotes, or where to put spaces, wastes time. <code>Black</code> is an uncompromising auto-formatter.</p>
+          <p>Install: <code>pip install black</code>.</p>
+          <p>Run it against your file: <code>black script.py</code>. It will automatically rewrite your file to meet strict PEP-8 standards.</p>
+        `
+      },
+      {
+        title: "🔍 Linting with Flake8",
+        content: `
+          <p>While Black handles formatting, a <strong>Linter</strong> analyzes your code for logical errors (e.g., importing a module but never using it, or referencing a variable before assignment).</p>
+          <p>Install: <code>pip install flake8</code>.</p>
+          <p>Run: <code>flake8 script.py</code>. It will print out warnings and errors. Fix them to keep your codebase pristine.</p>
+        `
+      },
+      {
+        title: "🏷️ Type Hints and Mypy",
+        content: `
+          <p>Python is dynamically typed. This is fast to write but leads to bugs (e.g., passing a string to a function expecting a list). Modern Python supports <strong>Type Hints</strong>.</p>
+          <pre class="lesson-code"><code># Without type hints
+def get_user(user_id):
+    pass
+
+# With type hints
+def get_user(user_id: int) -> dict:
+    pass</code></pre>
+          <p>To enforce these hints, we use a static type checker called <code>mypy</code>.</p>
+          <p>Install: <code>pip install mypy</code>.</p>
+          <p>Run: <code>mypy script.py</code>. It will scan your code and throw an error if you pass the wrong data type to a function!</p>
+        `
+      }
+    ],
+    practice: [
+      { id: "d23_t1", text: "Install <code>black</code>, <code>flake8</code>, and <code>mypy</code> via pip." },
+      { id: "d23_t2", text: "Write a messy, unformatted Python file and run <code>black filename.py</code> to watch it instantly format." },
+      { id: "d23_t3", text: "Run <code>flake8</code> on your Python files to detect any unused imports or variables." },
+      { id: "d23_t4", text: "Add type hints (e.g., <code>: str</code>, <code>-&gt; bool</code>) to a function and run <code>mypy filename.py</code> to validate it." }
+    ]
+  },
+  24: {
+    title: "Python CLI Tool — Build Phase",
+    sections: [
+      {
+        title: "🏗️ Project Overview: 'devtool'",
+        content: `
+          <p>It's time for the Phase 2 capstone project. We will build a multi-purpose DevOps CLI tool named <code>devtool</code> using everything we've learned.</p>
+          <p><strong>Requirements:</strong></p>
+          <ul>
+            <li>Built with <code>argparse</code> for subcommands (like \`git status\` vs \`git push\`).</li>
+            <li>Uses <code>requests</code> to ping APIs.</li>
+            <li>Uses <code>PyYAML</code> to parse a local config file.</li>
+            <li>Outputs beautiful terminal text using the <code>rich</code> library.</li>
+          </ul>
+        `
+      },
+      {
+        title: "🌈 Beautiful Terminal Output with Rich",
+        content: `
+          <p>The <code>rich</code> library makes CLI tools look professional by adding colors, tables, and progress bars.</p>
+          <p>Install: <code>pip install rich</code></p>
+          <pre class="lesson-code"><code>from rich.console import Console
+from rich.table import Table
+
+console = Console()
+console.print("[bold green]Success![/bold green] Deployment finished.")
+
+# Drawing a table
+table = Table(title="Server Status")
+table.add_column("Server", style="cyan")
+table.add_column("Status", style="magenta")
+table.add_row("web-01", "[green]Online[/green]")
+table.add_row("db-01", "[red]Offline[/red]")
+console.print(table)</code></pre>
+        `
+      },
+      {
+        title: "🔀 Argparse Subcommands",
+        content: `
+          <p>To support multiple commands (e.g., <code>devtool health</code> and <code>devtool deploy</code>), you use argparse subparsers.</p>
+          <pre class="lesson-code"><code>import argparse
+
+parser = argparse.ArgumentParser(prog="devtool")
+subparsers = parser.add_subparsers(dest="command")
+
+# Command 1: health
+parser_health = subparsers.add_parser("health", help="Check system health")
+parser_health.add_argument("--url", required=True)
+
+# Command 2: deploy
+parser_deploy = subparsers.add_parser("deploy", help="Deploy application")
+parser_deploy.add_argument("--env", choices=["dev", "prod"])
+
+args = parser.parse_args()
+
+if args.command == "health":
+    print(f"Checking health of {args.url}")
+elif args.command == "deploy":
+    print(f"Deploying to {args.env}")</code></pre>
+        `
+      }
+    ],
+    practice: [
+      { id: "d24_t1", text: "Install the <code>rich</code> library and create a script that prints a formatted table to the terminal." },
+      { id: "d24_t2", text: "Set up the skeleton for <code>devtool.py</code> using <code>argparse</code> with two subparsers: <code>health</code> and <code>deploy</code>." },
+      { id: "d24_t3", text: "Implement the <code>health</code> command logic to make a GET request to a URL provided by the user." },
+      { id: "d24_t4", text: "Wrap the request in a <code>try/except</code> block and use <code>rich</code> to print a green 'Online' or red 'Offline' message based on success." }
+    ]
+  },
+  25: {
+    title: "Python CLI Tool — Polish & Docs",
+    sections: [
+      {
+        title: "⚙️ Loading Configurations",
+        content: `
+          <p>Hardcoding URLs in your CLI tool is bad practice. Let's make <code>devtool</code> load default settings from a <code>config.yaml</code> file.</p>
+          <pre class="lesson-code"><code># config.yaml
+default_env: dev
+endpoints:
+  dev: "http://dev.myapp.com/health"
+  prod: "https://myapp.com/health"</code></pre>
+          <p>In your Python code, use PyYAML to load this file on startup, falling back to safe defaults if the file is missing (using <code>FileNotFoundError</code>).</p>
+        `
+      },
+      {
+        title: "🧪 Writing Tests for the CLI",
+        content: `
+          <p>How do you test a CLI? You separate the core logic from the argparse wrapper.</p>
+          <pre class="lesson-code"><code># logic.py
+def check_health(url: str) -> bool:
+    import requests
+    try:
+        res = requests.get(url, timeout=5)
+        return res.status_code == 200
+    except requests.RequestException:
+        return False
+
+# test_logic.py
+from unittest.mock import patch
+from logic import check_health
+
+@patch('requests.get')
+def test_check_health_success(mock_get):
+    mock_get.return_value.status_code = 200
+    assert check_health("http://fake.url") == True</code></pre>
+        `
+      },
+      {
+        title: "📚 Documentation (README)",
+        content: `
+          <p>A tool is useless if no one knows how to use it. A professional repository must have a <code>README.md</code> that includes:</p>
+          <ul>
+            <li><strong>Purpose</strong>: What does this tool do?</li>
+            <li><strong>Prerequisites</strong>: Requires Python 3.9+, etc.</li>
+            <li><strong>Installation</strong>: <code>pip install -r requirements.txt</code></li>
+            <li><strong>Usage Examples</strong>: Code blocks showing exact commands (e.g., <code>python devtool.py health --env prod</code>).</li>
+          </ul>
+        `
+      }
+    ],
+    practice: [
+      { id: "d25_t1", text: "Create a <code>config.yaml</code> file and implement PyYAML logic in your CLI to load default parameters from it." },
+      { id: "d25_t2", text: "Refactor your CLI's core logic into separate functions (with type hints) so they can be imported and tested." },
+      { id: "d25_t3", text: "Write at least two <code>pytest</code> unit tests (one success, one failure) for your health check function using <code>@patch</code>." },
+      { id: "d25_t4", text: "Create a professional <code>README.md</code> for your CLI tool documenting its commands, flags, and setup instructions." }
     ]
   }
 };
