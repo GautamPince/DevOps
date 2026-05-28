@@ -876,6 +876,166 @@ function initEventListeners() {
 }
 
 // ============================================================
+// ABOUT CREATOR & AI CHAT LOGIC
+// ============================================================
+
+// ─── Fetch GitHub Profile ──────────────────────────────
+async function fetchAboutData() {
+  const container = $('about-container');
+  try {
+    const res = await fetch('https://api.github.com/users/GautamPince');
+    if (!res.ok) throw new Error('Failed to fetch GitHub profile');
+    const data = await res.json();
+    
+    container.innerHTML = `
+      <div class="profile-card">
+        <img src="${data.avatar_url}" alt="${data.name || data.login}" class="profile-avatar" />
+        <h2 class="profile-name">${data.name || data.login}</h2>
+        <p class="profile-bio">${data.bio || 'DevOps Engineer & Open Source Enthusiast'}</p>
+        <div class="profile-stats">
+          <div class="stat-item">
+            <span class="stat-val">${data.public_repos}</span>
+            <span class="stat-label">Repos</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-val">${data.followers}</span>
+            <span class="stat-label">Followers</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-val">${data.following}</span>
+            <span class="stat-label">Following</span>
+          </div>
+        </div>
+        <a href="${data.html_url}" target="_blank" rel="noopener" class="profile-link">View on GitHub</a>
+      </div>
+    `;
+  } catch (error) {
+    container.innerHTML = `<div class="error-msg">Failed to load profile: ${error.message}</div>`;
+  }
+}
+
+// ─── AI Chat Logic ─────────────────────────────────────────
+function initAIChat() {
+  const chatFab = $('chat-fab');
+  const chatWidget = $('chat-widget');
+  const chatCloseBtn = $('chat-close-btn');
+  const chatSettingsBtn = $('chat-settings-btn');
+  const settingsModalOverlay = $('settings-modal-overlay');
+  const settingsCloseBtn = $('settings-close');
+  const saveSettingsBtn = $('save-settings-btn');
+  const apiKeyInput = $('gemini-api-key');
+  const chatInput = $('chat-input');
+  const chatSendBtn = $('chat-send-btn');
+  const chatMessages = $('chat-messages');
+
+  // Toggle Chat Widget
+  chatFab.addEventListener('click', () => {
+    const isHidden = chatWidget.getAttribute('aria-hidden') === 'true';
+    chatWidget.setAttribute('aria-hidden', !isHidden);
+  });
+
+  chatCloseBtn.addEventListener('click', () => {
+    chatWidget.setAttribute('aria-hidden', 'true');
+  });
+
+  // Settings Modal
+  chatSettingsBtn.addEventListener('click', () => {
+    settingsModalOverlay.classList.add('open');
+    apiKeyInput.value = localStorage.getItem('gemini_api_key') || '';
+  });
+
+  settingsCloseBtn.addEventListener('click', () => {
+    settingsModalOverlay.classList.remove('open');
+  });
+
+  settingsModalOverlay.addEventListener('click', (e) => {
+    if (e.target === settingsModalOverlay) settingsModalOverlay.classList.remove('open');
+  });
+
+  saveSettingsBtn.addEventListener('click', () => {
+    const key = apiKeyInput.value.trim();
+    if (key) {
+      localStorage.setItem('gemini_api_key', key);
+      settingsModalOverlay.classList.remove('open');
+      showToast('API Key saved successfully!');
+    } else {
+      showToast('Please enter a valid API key.');
+    }
+  });
+
+  // Send Message
+  async function sendMessage() {
+    const text = chatInput.value.trim();
+    if (!text) return;
+    
+    const apiKey = localStorage.getItem('gemini_api_key');
+    if (!apiKey) {
+      settingsModalOverlay.classList.add('open');
+      showToast('Please provide your Gemini API Key first.');
+      return;
+    }
+
+    // Append User Message
+    const userMsg = document.createElement('div');
+    userMsg.className = 'chat-message user-message';
+    userMsg.innerHTML = `<div class="message-content">${escapeHTML(text)}</div>`;
+    chatMessages.appendChild(userMsg);
+    chatInput.value = '';
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+
+    // Append Loading State
+    const aiMsg = document.createElement('div');
+    aiMsg.className = 'chat-message ai-message loading';
+    aiMsg.innerHTML = `<div class="message-content">Thinking...</div>`;
+    chatMessages.appendChild(aiMsg);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+
+    try {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contents: [{
+            parts: [{ text: "You are a helpful expert DevOps mentor. Answer this question concisely and effectively: " + text }]
+          }]
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to get response from Gemini API');
+      }
+
+      const data = await response.json();
+      const aiText = data.candidates[0].content.parts[0].text;
+      
+      aiMsg.classList.remove('loading');
+      aiMsg.innerHTML = `<div class="message-content">${marked.parse(aiText)}</div>`;
+    } catch (error) {
+      aiMsg.classList.remove('loading');
+      aiMsg.innerHTML = `<div class="message-content" style="color: var(--accent-red)">Error: ${error.message}. Please check your API key.</div>`;
+    }
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+
+  chatSendBtn.addEventListener('click', sendMessage);
+  chatInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') sendMessage();
+  });
+}
+
+function escapeHTML(str) {
+  return str.replace(/[&<>'"]/g, tag => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    "'": '&#39;',
+    '"': '&quot;'
+  }[tag] || tag));
+}
+
+// ============================================================
 // INIT
 // ============================================================
 function init() {
@@ -884,6 +1044,8 @@ function init() {
   initEventListeners();
   renderRoadmap();
   updateDashboard();
+  initAIChat();
+  fetchAboutData();
 
   // Update state last seen
   state.lastSeen = new Date().toISOString();

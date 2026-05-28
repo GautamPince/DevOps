@@ -33,6 +33,7 @@
         <button class="nav-btn active" id="nav-dashboard" data-tab="dashboard">Dashboard</button>
         <button class="nav-btn" id="nav-roadmap" data-tab="roadmap">Roadmap</button>
         <button class="nav-btn" id="nav-resources" data-tab="resources">Resources</button>
+        <button class="nav-btn" id="nav-about" data-tab="about">About Creator</button>
       </nav>
       <div class="header-actions">
         <div class="search-box">
@@ -252,6 +253,14 @@
       </div>
     </section>
 
+    <!-- ======================== ABOUT CREATOR TAB ======================== -->
+    <section class="tab-panel" id="tab-about">
+      <div class="about-container" id="about-container">
+        <!-- Will be populated by JS -->
+        <div class="loading-spinner"></div>
+      </div>
+    </section>
+
   </main>
 
   <!-- Day Detail Modal -->
@@ -290,6 +299,53 @@
   <!-- Toast Notification -->
   <div class="toast" id="toast"></div>
 
+  <!-- API Key Settings Modal -->
+  <div class="modal-overlay" id="settings-modal-overlay" aria-hidden="true">
+    <div class="modal settings-modal" id="settings-modal" role="dialog">
+      <div class="modal-header">
+        <h2 id="settings-title">AI Chat Settings</h2>
+        <button class="modal-close" id="settings-close" aria-label="Close modal">✕</button>
+      </div>
+      <div class="modal-body">
+        <p>To use the AI Chat assistant, please provide your free Gemini API key. This key is stored securely in your browser's local storage and is never sent anywhere else.</p>
+        <div class="settings-input-group">
+          <label for="gemini-api-key">Gemini API Key</label>
+          <input type="password" id="gemini-api-key" placeholder="AIzaSy..." />
+        </div>
+        <div class="modal-actions">
+          <button class="btn-primary" id="save-settings-btn">Save Key</button>
+          <a href="https://aistudio.google.com/app/apikey" target="_blank" class="get-key-link" rel="noopener">Get a free key here</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating Chat Button -->
+  <button class="chat-fab" id="chat-fab" aria-label="Open AI Chat">🤖</button>
+
+  <!-- Chat Widget -->
+  <div class="chat-widget" id="chat-widget" aria-hidden="true">
+    <div class="chat-header">
+      <div class="chat-title">
+        <span class="chat-icon">✨</span> AI DevOps Assistant
+      </div>
+      <div class="chat-header-actions">
+        <button class="chat-action-btn" id="chat-settings-btn" title="Settings">⚙️</button>
+        <button class="chat-action-btn" id="chat-close-btn" title="Close">✕</button>
+      </div>
+    </div>
+    <div class="chat-body" id="chat-messages">
+      <div class="chat-message ai-message">
+        <div class="message-content">Hello! I'm your DevOps AI assistant. If you get stuck on any day, ask me a question! 🚀</div>
+      </div>
+    </div>
+    <div class="chat-footer">
+      <input type="text" id="chat-input" placeholder="Type your question..." autocomplete="off" />
+      <button class="chat-send-btn" id="chat-send-btn" aria-label="Send message">➤</button>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script type="module" src="/app.js"></script>
 </body>
 </html>
