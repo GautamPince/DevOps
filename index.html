@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Track your 90-day DevOps learning journey with this interactive progress dashboard. Covers Linux, Docker, Kubernetes, Terraform, CI/CD, and Cloud." />
+  <title>DevOps 90-Day Roadmap | Interactive Progress Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="dark-mode">
+
+  <!-- Animated Background -->
+  <div class="bg-orbs" aria-hidden="true">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+
+  <!-- Header -->
+  <header class="header" id="top">
+    <div class="header-inner">
+      <div class="logo">
+        <span class="logo-icon">⚙️</span>
+        <div class="logo-text">
+          <span class="logo-title">DevOps Roadmap</span>
+          <span class="logo-sub">90-Day Learning Path</span>
+        </div>
+      </div>
+      <nav class="header-nav">
+        <button class="nav-btn active" id="nav-dashboard" data-tab="dashboard">Dashboard</button>
+        <button class="nav-btn" id="nav-roadmap" data-tab="roadmap">Roadmap</button>
+        <button class="nav-btn" id="nav-resources" data-tab="resources">Resources</button>
+      </nav>
+      <div class="header-actions">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="global-search" placeholder="Search topics..." autocomplete="off" />
+          <div class="search-results" id="search-results"></div>
+        </div>
+        <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark/light mode" title="Toggle theme">
+          <span class="theme-icon">🌙</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="main-content">
+
+    <!-- ======================== DASHBOARD TAB ======================== -->
+    <section class="tab-panel active" id="tab-dashboard">
+
+      <!-- Hero Stats -->
+      <div class="stats-grid">
+        <div class="stat-card primary">
+          <div class="stat-ring-container">
+            <svg class="progress-ring" viewBox="0 0 120 120" id="main-progress-ring">
+              <circle class="ring-bg" cx="60" cy="60" r="50"/>
+              <circle class="ring-fill" cx="60" cy="60" r="50" id="ring-fill-main"/>
+            </svg>
+            <div class="ring-center">
+              <span class="ring-percent" id="overall-percent">0%</span>
+              <span class="ring-label">Complete</span>
+            </div>
+          </div>
+          <div class="stat-info">
+            <h2>Overall Progress</h2>
+            <p id="overall-days-done">0 of 90 days done</p>
+            <div class="milestone-badges" id="milestone-badges"></div>
+          </div>
+        </div>
+
+        <div class="stat-card secondary">
+          <div class="stat-icon">📅</div>
+          <div class="stat-data">
+            <span class="stat-number" id="streak-count">0</span>
+            <span class="stat-name">Day Streak</span>
+          </div>
+        </div>
+
+        <div class="stat-card secondary">
+          <div class="stat-icon">✅</div>
+          <div class="stat-data">
+            <span class="stat-number" id="tasks-completed">0</span>
+            <span class="stat-name">Tasks Done</span>
+          </div>
+        </div>
+
+        <div class="stat-card secondary">
+          <div class="stat-icon">🏆</div>
+          <div class="stat-data">
+            <span class="stat-number" id="phases-completed">0</span>
+            <span class="stat-name">Phases Done</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Phase Progress Bars -->
+      <div class="section-header">
+        <h2 class="section-title">Phase Overview</h2>
+        <span class="section-sub">7 phases · 90 days</span>
+      </div>
+      <div class="phase-grid" id="phase-grid"></div>
+
+      <!-- Recent Activity -->
+      <div class="two-col-grid">
+        <div class="glass-card">
+          <div class="card-header">
+            <h3>📝 Notes</h3>
+            <button class="btn-ghost" id="clear-notes-btn">Clear</button>
+          </div>
+          <textarea id="global-notes" placeholder="Jot down thoughts, links, commands..." rows="8"></textarea>
+        </div>
+        <div class="glass-card">
+          <div class="card-header">
+            <h3>🎯 Today's Focus</h3>
+          </div>
+          <div id="todays-focus"></div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ======================== ROADMAP TAB ======================== -->
+    <section class="tab-panel" id="tab-roadmap">
+
+      <!-- Filter Bar -->
+      <div class="filter-bar">
+        <div class="filter-chips" id="filter-chips">
+          <button class="chip active" data-phase="all">All Phases</button>
+          <button class="chip" data-phase="1">Phase 1: Linux &amp; Git</button>
+          <button class="chip" data-phase="2">Phase 2: Python</button>
+          <button class="chip" data-phase="3">Phase 3: Docker</button>
+          <button class="chip" data-phase="4">Phase 4: Kubernetes</button>
+          <button class="chip" data-phase="5">Phase 5: IaC</button>
+          <button class="chip" data-phase="6">Phase 6: CI/CD</button>
+          <button class="chip" data-phase="7">Phase 7: Cloud &amp; GitOps</button>
+        </div>
+        <div class="filter-right">
+          <label class="toggle-label">
+            <input type="checkbox" id="hide-completed" />
+            <span>Hide Completed</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Days List -->
+      <div class="days-container" id="days-container"></div>
+    </section>
+
+    <!-- ======================== RESOURCES TAB ======================== -->
+    <section class="tab-panel" id="tab-resources">
+      <div class="resources-grid">
+
+        <div class="resource-category">
+          <div class="resource-category-header">
+            <span class="resource-icon">📚</span>
+            <h3>Books</h3>
+          </div>
+          <ul class="resource-list">
+            <li><a href="#" class="resource-link">The Phoenix Project — Gene Kim</a><span class="resource-tag recommended">Must Read</span></li>
+            <li><a href="#" class="resource-link">The DevOps Handbook — Gene Kim</a><span class="resource-tag recommended">Must Read</span></li>
+            <li><a href="#" class="resource-link">Site Reliability Engineering — Google</a><span class="resource-tag">SRE</span></li>
+            <li><a href="#" class="resource-link">Kubernetes: Up and Running</a><span class="resource-tag">K8s</span></li>
+            <li><a href="#" class="resource-link">Terraform: Up and Running — Brik Yevgeniy</a><span class="resource-tag">IaC</span></li>
+          </ul>
+        </div>
+
+        <div class="resource-category">
+          <div class="resource-category-header">
+            <span class="resource-icon">🌐</span>
+            <h3>Online Platforms</h3>
+          </div>
+          <ul class="resource-list">
+            <li><a href="https://linuxjourney.com" target="_blank" rel="noopener" class="resource-link">Linux Journey</a><span class="resource-tag free">Free</span></li>
+            <li><a href="https://kodekloud.com" target="_blank" rel="noopener" class="resource-link">KodeKloud</a><span class="resource-tag">Labs</span></li>
+            <li><a href="https://killercoda.com" target="_blank" rel="noopener" class="resource-link">Killercoda</a><span class="resource-tag free">Free</span></li>
+            <li><a href="https://labs.play-with-docker.com" target="_blank" rel="noopener" class="resource-link">Play with Docker</a><span class="resource-tag free">Free</span></li>
+            <li><a href="https://acloudguru.com" target="_blank" rel="noopener" class="resource-link">A Cloud Guru</a><span class="resource-tag">Paid</span></li>
+            <li><a href="https://skillbuilder.aws" target="_blank" rel="noopener" class="resource-link">AWS Skill Builder</a><span class="resource-tag free">Free</span></li>
+          </ul>
+        </div>
+
+        <div class="resource-category">
+          <div class="resource-category-header">
+            <span class="resource-icon">📺</span>
+            <h3>YouTube Channels</h3>
+          </div>
+          <ul class="resource-list">
+            <li><a href="https://www.youtube.com/@TechWorldwithNana" target="_blank" rel="noopener" class="resource-link">TechWorld with Nana</a><span class="resource-tag recommended">Top Pick</span></li>
+            <li><a href="https://www.youtube.com/@NetworkChuck" target="_blank" rel="noopener" class="resource-link">NetworkChuck</a><span class="resource-tag">Networking</span></li>
+            <li><a href="https://www.youtube.com/@Fireship" target="_blank" rel="noopener" class="resource-link">Fireship</a><span class="resource-tag">Overview</span></li>
+            <li><a href="https://www.youtube.com/@thatdevopsguy" target="_blank" rel="noopener" class="resource-link">That DevOps Guy</a><span class="resource-tag">CI/CD</span></li>
+            <li><a href="https://www.youtube.com/@AntonPutra" target="_blank" rel="noopener" class="resource-link">Anton Putra</a><span class="resource-tag">K8s</span></li>
+          </ul>
+        </div>
+
+        <div class="resource-category">
+          <div class="resource-category-header">
+            <span class="resource-icon">🏅</span>
+            <h3>Certifications</h3>
+          </div>
+          <ul class="resource-list">
+            <li><span class="resource-link">AWS Cloud Practitioner (CLF-C02)</span><span class="resource-tag">Entry</span></li>
+            <li><span class="resource-link">AWS Solutions Architect Associate (SAA-C03)</span><span class="resource-tag recommended">High Value</span></li>
+            <li><span class="resource-link">Certified Kubernetes Administrator (CKA)</span><span class="resource-tag recommended">High Value</span></li>
+            <li><span class="resource-link">HashiCorp Terraform Associate</span><span class="resource-tag">IaC</span></li>
+            <li><span class="resource-link">Docker Certified Associate (DCA)</span><span class="resource-tag">Containers</span></li>
+          </ul>
+        </div>
+
+        <div class="resource-category">
+          <div class="resource-category-header">
+            <span class="resource-icon">🛠️</span>
+            <h3>Essential Tools</h3>
+          </div>
+          <div class="tools-grid">
+            <div class="tool-chip">Linux</div>
+            <div class="tool-chip">Git</div>
+            <div class="tool-chip">Docker</div>
+            <div class="tool-chip">Kubernetes</div>
+            <div class="tool-chip">Helm</div>
+            <div class="tool-chip">Terraform</div>
+            <div class="tool-chip">Ansible</div>
+            <div class="tool-chip">GitHub Actions</div>
+            <div class="tool-chip">Prometheus</div>
+            <div class="tool-chip">Grafana</div>
+            <div class="tool-chip">ArgoCD</div>
+            <div class="tool-chip">AWS</div>
+            <div class="tool-chip">Python</div>
+            <div class="tool-chip">Bash</div>
+            <div class="tool-chip">YAML</div>
+            <div class="tool-chip">Nginx</div>
+          </div>
+        </div>
+
+        <div class="resource-category">
+          <div class="resource-category-header">
+            <span class="resource-icon">💬</span>
+            <h3>Communities</h3>
+          </div>
+          <ul class="resource-list">
+            <li><a href="https://www.reddit.com/r/devops/" target="_blank" rel="noopener" class="resource-link">r/devops — Reddit</a><span class="resource-tag free">Free</span></li>
+            <li><a href="https://slack.cncf.io/" target="_blank" rel="noopener" class="resource-link">CNCF Slack</a><span class="resource-tag free">Free</span></li>
+            <li><a href="https://devops.com" target="_blank" rel="noopener" class="resource-link">DevOps.com</a><span class="resource-tag">Articles</span></li>
+            <li><a href="https://dev.to/t/devops" target="_blank" rel="noopener" class="resource-link">DEV.to - DevOps Tag</a><span class="resource-tag free">Free</span></li>
+          </ul>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Day Detail Modal -->
+  <div class="modal-overlay" id="modal-overlay" aria-hidden="true">
+    <div class="modal" id="day-modal" role="dialog" aria-labelledby="modal-title">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <span class="modal-day-badge" id="modal-day-badge">Day 1</span>
+          <h2 id="modal-title">Day Title</h2>
+        </div>
+        <button class="modal-close" id="modal-close" aria-label="Close modal">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-phase-tag" id="modal-phase-tag"></div>
+        <div class="modal-goal" id="modal-goal"></div>
+        <div class="modal-topics" id="modal-topics"></div>
+
+        <!-- Mentor-style Lesson Content -->
+        <div class="modal-lesson-content-wrapper" id="modal-lesson-content"></div>
+
+        <!-- Practice Checklist -->
+        <div class="modal-practice-section" id="modal-practice-section"></div>
+
+        <div class="modal-notes-section">
+          <label class="notes-label" for="modal-notes">📝 My Notes</label>
+          <textarea id="modal-notes" placeholder="Write your notes, commands tried, links found..." rows="6"></textarea>
+        </div>
+        <div class="modal-actions">
+          <button class="btn-primary" id="modal-complete-btn">Mark as Complete ✅</button>
+          <button class="btn-secondary" id="modal-save-notes">Save Notes 💾</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast" id="toast"></div>
+
+  <script src="content.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
