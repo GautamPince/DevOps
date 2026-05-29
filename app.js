@@ -793,6 +793,15 @@ function initEventListeners() {
     btn.addEventListener('click', () => switchTab(btn.dataset.tab));
   });
 
+  // Footer nav links
+  document.querySelectorAll('[data-footer-tab]').forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      switchTab(link.dataset.footerTab);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  });
+
   // Theme toggle
   $('theme-toggle').addEventListener('click', toggleTheme);
 
@@ -882,6 +891,7 @@ function initEventListeners() {
 // ─── Fetch GitHub Profile ──────────────────────────────
 async function fetchAboutData() {
   const container = $('about-container');
+  const footerCard = $('footer-creator-card');
   try {
     const res = await fetch('https://api.github.com/users/GautamPince');
     if (!res.ok) throw new Error('Failed to fetch GitHub profile');
@@ -909,8 +919,25 @@ async function fetchAboutData() {
         <a href="${data.html_url}" target="_blank" rel="noopener" class="profile-link">View on GitHub</a>
       </div>
     `;
+
+    // Also populate the footer creator card
+    if (footerCard) {
+      footerCard.innerHTML = `
+        <img src="${data.avatar_url}" alt="${data.name || data.login}" class="footer-creator-avatar" />
+        <div class="footer-creator-info">
+          <span class="footer-creator-name">${data.name || data.login}</span>
+          <span class="footer-creator-meta">${data.public_repos} repos · ${data.followers} followers</span>
+          <span class="footer-creator-badge">Creator</span>
+        </div>
+      `;
+      footerCard.style.cursor = 'pointer';
+      footerCard.addEventListener('click', () => {
+        window.open(data.html_url, '_blank');
+      });
+    }
   } catch (error) {
     container.innerHTML = `<div class="error-msg">Failed to load profile: ${error.message}</div>`;
+    if (footerCard) footerCard.innerHTML = `<span style="color:var(--text-muted);font-size:0.85rem">Could not load creator info</span>`;
   }
 }
 
