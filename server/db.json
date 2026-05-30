@@ -1,0 +1,42 @@
+{
+  "users": [
+    {
+      "id": "7ba73a6a-bb44-412c-abf1-498d32039b7f",
+      "email": "smoke+1780027149113@example.com",
+      "passwordHash": "$2b$10$9s/Stc7/zrQTbUOwuUfQLerw2Wfz9ebzDc9m12zQ8xEXbbin0nOJa",
+      "name": "Smoke Tester",
+      "createdAt": "2026-05-29T03:59:09.665Z"
+    },
+    {
+      "id": "36b16dc9-81a1-4fb4-81e9-ffe4d4de3052",
+      "email": "smoke+1780117668747@example.com",
+      "passwordHash": "$2b$10$7KBe1MSc0Nn4RyMbB2lmYuTRmZFRx0Sfrl3C3JbmBkfdSotVylXpO",
+      "name": "Smoke Tester",
+      "createdAt": "2026-05-30T05:07:49.631Z"
+    }
+  ],
+  "userStates": {
+    "7ba73a6a-bb44-412c-abf1-498d32039b7f": {
+      "completed": {
+        "1": true
+      },
+      "notes": {
+        "1": "smoke note"
+      },
+      "globalNotes": "smoke global"
+    },
+    "36b16dc9-81a1-4fb4-81e9-ffe4d4de3052": {
+      "completed": {
+        "1": true
+      },
+      "notes": {
+        "1": "smoke note"
+      },
+      "globalNotes": "smoke global"
+    }
+  },
+  "practiceChecks": {
+    "7ba73a6a-bb44-412c-abf1-498d32039b7f:1:task1": true,
+    "36b16dc9-81a1-4fb4-81e9-ffe4d4de3052:1:task1": true
+  }
+}

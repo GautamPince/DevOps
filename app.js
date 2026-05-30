@@ -67,15 +67,15 @@ const PHASES = [
 
 const DAYS_DATA = [
   // ─── PHASE 1: Linux, Bash & Git ──────────────────────────
-  { day: 1,  phase: 1, title: 'Linux Essentials & Navigation', goal: 'Navigate the Linux filesystem confidently and manage users, files, and permissions.', tags: ['Linux', 'CLI', 'Permissions'] },
-  { day: 2,  phase: 1, title: 'File System & Text Manipulation', goal: 'Parse and manipulate text files using powerful CLI tools like grep, awk, and sed.', tags: ['grep', 'awk', 'sed', 'pipes'] },
-  { day: 3,  phase: 1, title: 'Process Management & Cron', goal: 'Monitor running processes and schedule automated tasks with systemd and cron.', tags: ['systemd', 'cron', 'ps', 'htop'] },
-  { day: 4,  phase: 1, title: 'Bash Scripting Basics', goal: 'Write functional automation scripts using variables, conditionals, and loops.', tags: ['Bash', 'Scripting', 'Automation'] },
-  { day: 5,  phase: 1, title: 'Advanced Bash Scripting', goal: 'Build robust, error-handled scripts with arrays, traps, and argument parsing.', tags: ['Bash', 'Error Handling', 'getopts'] },
-  { day: 6,  phase: 1, title: 'Networking Fundamentals', goal: 'Understand the TCP/IP stack, IP addressing, CIDR notation, and firewall basics.', tags: ['TCP/IP', 'DNS', 'CIDR', 'Firewall'] },
-  { day: 7,  phase: 1, title: 'Linux Networking Tools', goal: 'Diagnose network issues with ssh, curl, rsync, netcat, and tcpdump.', tags: ['SSH', 'curl', 'rsync', 'tcpdump'] },
-  { day: 8,  phase: 1, title: 'Git Version Control — Basics', goal: 'Master Git fundamentals: staging, committing, branching, and merging.', tags: ['Git', 'VCS', 'Branching'] },
-  { day: 9,  phase: 1, title: 'Git — Collaboration & Remotes', goal: 'Work with remote repos, pull requests, merge conflicts, and .gitignore.', tags: ['Git', 'GitHub', 'PRs'] },
+  { day: 1, phase: 1, title: 'Linux Essentials & Navigation', goal: 'Navigate the Linux filesystem confidently and manage users, files, and permissions.', tags: ['Linux', 'CLI', 'Permissions'] },
+  { day: 2, phase: 1, title: 'File System & Text Manipulation', goal: 'Parse and manipulate text files using powerful CLI tools like grep, awk, and sed.', tags: ['grep', 'awk', 'sed', 'pipes'] },
+  { day: 3, phase: 1, title: 'Process Management & Cron', goal: 'Monitor running processes and schedule automated tasks with systemd and cron.', tags: ['systemd', 'cron', 'ps', 'htop'] },
+  { day: 4, phase: 1, title: 'Bash Scripting Basics', goal: 'Write functional automation scripts using variables, conditionals, and loops.', tags: ['Bash', 'Scripting', 'Automation'] },
+  { day: 5, phase: 1, title: 'Advanced Bash Scripting', goal: 'Build robust, error-handled scripts with arrays, traps, and argument parsing.', tags: ['Bash', 'Error Handling', 'getopts'] },
+  { day: 6, phase: 1, title: 'Networking Fundamentals', goal: 'Understand the TCP/IP stack, IP addressing, CIDR notation, and firewall basics.', tags: ['TCP/IP', 'DNS', 'CIDR', 'Firewall'] },
+  { day: 7, phase: 1, title: 'Linux Networking Tools', goal: 'Diagnose network issues with ssh, curl, rsync, netcat, and tcpdump.', tags: ['SSH', 'curl', 'rsync', 'tcpdump'] },
+  { day: 8, phase: 1, title: 'Git Version Control — Basics', goal: 'Master Git fundamentals: staging, committing, branching, and merging.', tags: ['Git', 'VCS', 'Branching'] },
+  { day: 9, phase: 1, title: 'Git — Collaboration & Remotes', goal: 'Work with remote repos, pull requests, merge conflicts, and .gitignore.', tags: ['Git', 'GitHub', 'PRs'] },
   { day: 10, phase: 1, title: 'Git Workflows & Best Practices', goal: 'Use GitFlow, Trunk-Based Development, and Conventional Commits professionally.', tags: ['GitFlow', 'Commits', 'Hooks'] },
   { day: 11, phase: 1, title: 'Linux Security Hardening', goal: 'Harden a Linux server: SSH config, fail2ban, sudoers, and audit logging.', tags: ['Security', 'SSH', 'fail2ban'] },
   { day: 12, phase: 1, title: 'AppArmor, SELinux & Audit', goal: 'Apply mandatory access controls and audit user activity with auditd.', tags: ['AppArmor', 'SELinux', 'auditd'] },
@@ -175,6 +175,8 @@ const DAYS_DATA = [
 // STATE MANAGEMENT
 // ============================================================
 const STATE_KEY = 'devops_roadmap_v2';
+const AUTH_TOKEN_KEY = 'devops_token';
+const AUTH_USER_KEY = 'devops_user';
 
 function loadState() {
   try {
@@ -618,9 +620,9 @@ function renderPracticeQuestions(dayNum) {
     </div>
     <div class="practice-list">
       ${contentData.practice.map(task => {
-        const key = `${dayNum}_${task.id}`;
-        const isChecked = !!state.practiceChecked[key];
-        return `
+    const key = `${dayNum}_${task.id}`;
+    const isChecked = !!state.practiceChecked[key];
+    return `
           <div class="practice-item ${isChecked ? 'checked' : ''}" data-task-id="${task.id}">
             <div class="practice-checkbox-container">
               <input type="checkbox" class="practice-checkbox" id="chk-${task.id}" ${isChecked ? 'checked' : ''} />
@@ -628,7 +630,7 @@ function renderPracticeQuestions(dayNum) {
             <label class="practice-text" for="chk-${task.id}">${task.text}</label>
           </div>
         `;
-      }).join('')}
+  }).join('')}
     </div>
   `;
 
@@ -805,6 +807,48 @@ function initEventListeners() {
   // Theme toggle
   $('theme-toggle').addEventListener('click', toggleTheme);
 
+  // Auth button and modal interactions
+  const authBtn = $('auth-btn');
+  const authModal = $('auth-modal-overlay');
+  const authClose = $('auth-modal-close');
+  const loginSubmit = $('login-submit');
+  const signupSubmit = $('signup-submit');
+  const openSignup = $('open-signup');
+  const authTabLogin = $('auth-tab-login');
+  const authTabSignup = $('auth-tab-signup');
+  const loginForm = $('login-form');
+  const signupForm = $('signup-form');
+  const loginShowPw = $('login-show-password');
+  const signupShowPw = $('signup-show-password');
+
+  if (authBtn) authBtn.addEventListener('click', () => {
+    if (isLoggedIn()) logout(); else showAuthModal('login');
+  });
+
+  if (authClose && authModal) authClose.addEventListener('click', () => hideAuthModal());
+  if (authModal) authModal.addEventListener('click', e => { if (e.target === authModal) hideAuthModal(); });
+
+  if (openSignup) openSignup.addEventListener('click', () => { toggleAuthTab('signup'); });
+  if (authTabLogin) authTabLogin.addEventListener('click', () => toggleAuthTab('login'));
+  if (authTabSignup) authTabSignup.addEventListener('click', () => toggleAuthTab('signup'));
+
+  if (loginShowPw) loginShowPw.addEventListener('click', () => {
+    const input = $('login-password'); if (!input) return;
+    input.type = input.type === 'password' ? 'text' : 'password';
+    loginShowPw.setAttribute('aria-pressed', input.type === 'text');
+  });
+  if (signupShowPw) signupShowPw.addEventListener('click', () => {
+    const input = $('signup-password'); if (!input) return;
+    input.type = input.type === 'password' ? 'text' : 'password';
+    signupShowPw.setAttribute('aria-pressed', input.type === 'text');
+  });
+
+  if (loginForm) loginForm.addEventListener('submit', e => { e.preventDefault(); handleLogin(e); });
+  if (signupForm) signupForm.addEventListener('submit', e => { e.preventDefault(); handleSignup(e); });
+
+  if (loginSubmit) loginSubmit.addEventListener('click', handleLogin);
+  if (signupSubmit) signupSubmit.addEventListener('click', handleSignup);
+
   // Modal close
   $('modal-close').addEventListener('click', closeModal);
   $('modal-overlay').addEventListener('click', e => {
@@ -896,7 +940,7 @@ async function fetchAboutData() {
     const res = await fetch('https://api.github.com/users/GautamPince');
     if (!res.ok) throw new Error('Failed to fetch GitHub profile');
     const data = await res.json();
-    
+
     container.innerHTML = `
       <div class="profile-card">
         <img src="${data.avatar_url}" alt="${data.name || data.login}" class="profile-avatar" />
@@ -994,13 +1038,6 @@ function initAIChat() {
   async function sendMessage() {
     const text = chatInput.value.trim();
     if (!text) return;
-    
-    const apiKey = localStorage.getItem('gemini_api_key');
-    if (!apiKey) {
-      settingsModalOverlay.classList.add('open');
-      showToast('Please provide your Gemini API Key first.');
-      return;
-    }
 
     // Append User Message
     const userMsg = document.createElement('div');
@@ -1018,30 +1055,28 @@ function initAIChat() {
     chatMessages.scrollTop = chatMessages.scrollHeight;
 
     try {
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
+      // Proxy request to server-side chat endpoint
+      const localKey = localStorage.getItem('gemini_api_key') || null;
+      const body = localKey ? { message: text, apiKey: localKey } : { message: text };
+      const resp = await fetch('/api/chat', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          contents: [{
-            parts: [{ text: "You are a helpful expert DevOps mentor. Answer this question concisely and effectively: " + text }]
-          }]
-        })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to get response from Gemini API');
+      if (!resp.ok) {
+        const txt = await resp.text();
+        throw new Error(txt || 'Server error');
       }
 
-      const data = await response.json();
-      const aiText = data.candidates[0].content.parts[0].text;
-      
+      const payload = await resp.json();
+      const aiText = payload.reply || (payload.data && payload.data.candidates && payload.data.candidates[0] && payload.data.candidates[0].content && payload.data.candidates[0].content.parts && payload.data.candidates[0].content.parts[0] && payload.data.candidates[0].content.parts[0].text) || 'No response';
+
       aiMsg.classList.remove('loading');
-      aiMsg.innerHTML = `<div class="message-content">${marked.parse(aiText)}</div>`;
+      aiMsg.innerHTML = `<div class="message-content">${marked.parse(escapeHTML(aiText))}</div>`;
     } catch (error) {
       aiMsg.classList.remove('loading');
-      aiMsg.innerHTML = `<div class="message-content" style="color: var(--accent-red)">Error: ${error.message}. Please check your API key.</div>`;
+      aiMsg.innerHTML = `<div class="message-content" style="color: var(--accent-red)">Error: ${escapeHTML(error.message || 'Unknown error')}</div>`;
     }
     chatMessages.scrollTop = chatMessages.scrollHeight;
   }
@@ -1051,6 +1086,208 @@ function initAIChat() {
     if (e.key === 'Enter') sendMessage();
   });
 }
+
+// ------------------ Auth Helpers ------------------
+function getAuthToken() {
+  return localStorage.getItem(AUTH_TOKEN_KEY) || null;
+}
+
+function setAuthToken(token) {
+  if (token) localStorage.setItem(AUTH_TOKEN_KEY, token);
+  else localStorage.removeItem(AUTH_TOKEN_KEY);
+}
+
+function setAuthUser(user) {
+  if (user) localStorage.setItem(AUTH_USER_KEY, JSON.stringify(user));
+  else localStorage.removeItem(AUTH_USER_KEY);
+}
+
+function getAuthUser() {
+  try { return JSON.parse(localStorage.getItem(AUTH_USER_KEY)); } catch { return null; }
+}
+
+function isLoggedIn() {
+  return !!getAuthToken();
+}
+
+async function apiFetch(path, opts = {}) {
+  const token = getAuthToken();
+  const headers = opts.headers || {};
+  if (!(opts && opts.body) && (opts.method && opts.method.toUpperCase() !== 'GET')) {
+    headers['Content-Type'] = headers['Content-Type'] || 'application/json';
+  }
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  const res = await fetch(`/api${path}`, { ...opts, headers });
+  if (res.status === 401) {
+    // Token invalid or expired
+    setAuthToken(null);
+    setAuthUser(null);
+    renderAuthUI();
+  }
+  return res;
+}
+
+function toggleAuthTab(tab) {
+  const loginPanel = $('login-form');
+  const signupPanel = $('signup-form');
+  const loginTabBtn = $('auth-tab-login');
+  const signupTabBtn = $('auth-tab-signup');
+  if (!loginPanel || !signupPanel) return;
+  if (tab === 'signup') {
+    loginPanel.style.display = 'none';
+    loginPanel.setAttribute('aria-hidden', 'true');
+    signupPanel.style.display = '';
+    signupPanel.setAttribute('aria-hidden', 'false');
+    loginTabBtn?.classList.remove('active');
+    loginTabBtn?.setAttribute('aria-selected', 'false');
+    signupTabBtn?.classList.add('active');
+    signupTabBtn?.setAttribute('aria-selected', 'true');
+    setTimeout(() => $('signup-name')?.focus(), 150);
+  } else {
+    signupPanel.style.display = 'none';
+    signupPanel.setAttribute('aria-hidden', 'true');
+    loginPanel.style.display = '';
+    loginPanel.setAttribute('aria-hidden', 'false');
+    signupTabBtn?.classList.remove('active');
+    signupTabBtn?.setAttribute('aria-selected', 'false');
+    loginTabBtn?.classList.add('active');
+    loginTabBtn?.setAttribute('aria-selected', 'true');
+    setTimeout(() => $('login-email')?.focus(), 150);
+  }
+}
+
+function showAuthModal(tab = 'login') {
+  const modal = $('auth-modal-overlay');
+  if (!modal) return;
+  toggleAuthTab(tab);
+  modal.classList.add('open');
+  modal.setAttribute('aria-hidden', 'false');
+  setTimeout(() => {
+    if (tab === 'signup') $('signup-name')?.focus(); else $('login-email')?.focus();
+  }, 120);
+}
+
+function hideAuthModal() {
+  const modal = $('auth-modal-overlay');
+  if (!modal) return;
+  modal.classList.remove('open');
+  modal.setAttribute('aria-hidden', 'true');
+}
+
+function setFormLoading(formEl, loading, text) {
+  if (!formEl) return;
+  const inputs = formEl.querySelectorAll('input, button, textarea');
+  inputs.forEach(i => { try { i.disabled = loading; } catch (e) { } });
+  const primary = formEl.querySelector('.btn-primary');
+  if (primary) {
+    if (!primary.dataset.origText) primary.dataset.origText = primary.textContent;
+    primary.textContent = loading ? (text || 'Please wait...') : primary.dataset.origText;
+    primary.classList.toggle('loading', loading);
+  }
+}
+
+async function handleLogin(e) {
+  if (e && e.preventDefault) e.preventDefault();
+  const errorEl = $('login-error'); if (errorEl) errorEl.textContent = '';
+  const form = $('login-form');
+  const email = $('login-email').value.trim();
+  const password = $('login-password').value;
+  if (!email || !password) { if (errorEl) errorEl.textContent = 'Please enter email and password.'; return; }
+  if (!/\S+@\S+\.\S+/.test(email)) { if (errorEl) errorEl.textContent = 'Please enter a valid email address.'; return; }
+  setFormLoading(form, true, 'Signing in...');
+  try {
+    const res = await fetch('/api/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password }) });
+    let payload = {};
+    try { payload = await res.json(); } catch (err) { payload = {}; }
+    if (!res.ok) { if (errorEl) errorEl.textContent = payload.error || payload.message || 'Login failed'; return; }
+    setAuthToken(payload.token);
+    setAuthUser(payload.user);
+    hideAuthModal();
+    renderAuthUI();
+    await loadStateFromServer();
+    showToast('Signed in');
+  } catch (err) {
+    console.error(err);
+    if (errorEl) errorEl.textContent = 'Network error — please try again.';
+  } finally { setFormLoading(form, false); }
+}
+
+async function handleSignup(e) {
+  if (e && e.preventDefault) e.preventDefault();
+  const errorEl = $('signup-error'); if (errorEl) errorEl.textContent = '';
+  const form = $('signup-form');
+  const name = $('signup-name').value.trim();
+  const email = $('signup-email').value.trim();
+  const password = $('signup-password').value;
+  if (!email || !password) { if (errorEl) errorEl.textContent = 'Please enter email and password.'; return; }
+  if (!/\S+@\S+\.\S+/.test(email)) { if (errorEl) errorEl.textContent = 'Please enter a valid email address.'; return; }
+  if (password.length < 8) { if (errorEl) errorEl.textContent = 'Password must be at least 8 characters.'; return; }
+  setFormLoading(form, true, 'Creating...');
+  try {
+    const res = await fetch('/api/auth/signup', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, email, password }) });
+    let payload = {};
+    try { payload = await res.json(); } catch (err) { payload = {}; }
+    if (!res.ok) { if (errorEl) errorEl.textContent = payload.error || payload.message || 'Signup failed'; return; }
+    setAuthToken(payload.token);
+    setAuthUser(payload.user);
+    hideAuthModal();
+    renderAuthUI();
+    await loadStateFromServer();
+    showToast('Account created and signed in');
+  } catch (err) {
+    console.error(err);
+    if (errorEl) errorEl.textContent = 'Network error — please try again.';
+  } finally { setFormLoading(form, false); }
+}
+
+async function logout() {
+  setAuthToken(null);
+  setAuthUser(null);
+  renderAuthUI();
+  showToast('Signed out');
+}
+
+function renderAuthUI() {
+  const btn = $('auth-btn');
+  const user = getAuthUser();
+  if (!btn) return;
+  if (user) {
+    btn.textContent = user.name ? `Hi, ${user.name.split(' ')[0]}` : user.email;
+    btn.title = 'Click to sign out';
+  } else {
+    btn.textContent = 'Sign In';
+    btn.title = 'Sign in to sync your progress';
+  }
+}
+
+async function loadStateFromServer() {
+  if (!isLoggedIn()) return;
+  try {
+    const res = await apiFetch('/user/state');
+    if (!res.ok) return;
+    const j = await res.json();
+    if (j.state) {
+      state = { ...createDefaultState(), ...j.state };
+      saveState(state);
+      renderRoadmap();
+      updateDashboard();
+    }
+  } catch (err) { console.error('loadStateFromServer', err); }
+}
+
+async function syncStateToServer() {
+  if (!isLoggedIn()) return;
+  try {
+    await apiFetch('/user/state', { method: 'PUT', body: JSON.stringify({ state }) });
+  } catch (err) { console.error('syncStateToServer', err); }
+}
+
+// Hook into toggleDayComplete to sync
+const _toggleDayComplete = toggleDayComplete;
+toggleDayComplete = function (dayNum) {
+  _toggleDayComplete(dayNum);
+  syncStateToServer();
+};
 
 function escapeHTML(str) {
   return str.replace(/[&<>'"]/g, tag => ({

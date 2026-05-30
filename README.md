@@ -92,6 +92,30 @@ npm run preview  # Preview the production build locally
 
 > Your API key is stored **only** in your browser's `localStorage` and is never sent anywhere except directly to the Gemini API.
 
+### Local .env (optional)
+
+If you prefer to keep keys in a file for local development or server-side features, create a `.env` file at the project root with the following variables: `GEMINI_API_KEY`, `OPENROUTER_API_KEY`, and `OPENROUTER_MODEL`. Do NOT commit this file — `.gitignore` already excludes `.env*`.
+
+**Windows (PowerShell)**
+
+To set these environment variables for the current PowerShell session:
+
+```powershell
+$env:GEMINI_API_KEY = "<your_gemini_key_here>"
+$env:OPENROUTER_API_KEY = "<your_openrouter_key_here>"
+$env:OPENROUTER_MODEL = "openai/gpt-oss-20b:free"
+```
+
+To persist them across sessions (use with caution):
+
+```powershell
+setx GEMINI_API_KEY "<your_gemini_key_here>"
+setx OPENROUTER_API_KEY "<your_openrouter_key_here>"
+setx OPENROUTER_MODEL "openai/gpt-oss-20b:free"
+```
+
+After using `setx` open a new PowerShell window for the variables to take effect. For production, prefer secret managers over storing secrets in environment variables.
+
 ---
 
 ## 📁 Project Structure
