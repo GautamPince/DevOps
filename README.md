@@ -1,5 +1,9 @@
 # 🚀 DevOps 90-Day Roadmap — Interactive Learning Dashboard
 
+Live demo: https://devopsbootcamp.in
+
+[![Pages build and deployment status](https://github.com/GautamPince/DevOps/actions/workflows/deploy-pages.yml/badge.svg)](https://github.com/GautamPince/DevOps/actions/workflows/deploy-pages.yml)
+
 A **premium, interactive web application** that guides you through a structured 90-day DevOps learning journey — from absolute zero to job-ready engineer.
 
 > Built with ❤️ by [GautamPince](https://github.com/GautamPince)
